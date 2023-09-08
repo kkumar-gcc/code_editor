@@ -7,7 +7,7 @@ export default function LoginPage() {
     return (
         <section className="flex justify-center items-center min-h-screen">
             <div className="text-center">
-                <Button icon={<Github />} auto onClick={() => signIn("github", { callbackUrl: "/" })}>Sign in with Github</Button>
+                <Button auto onClick={() => signIn("github", { callbackUrl: "/" })}><Github /> Sign in with Github</Button>
             </div>
         </section>
     );
