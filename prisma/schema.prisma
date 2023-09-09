@@ -48,6 +48,7 @@ model File {
   name      String
   path      String
   size      Int
+  mimeType  String
   userId    String
   user      User      @relation(fields: [userId], references: [id])
   folderId  String?

@@ -39,20 +39,58 @@ class MinioManager {
         return this.client.removeObjects(this.bucket, files);
     }
 
-    public put(file: string, content: string){
-        return this.client.putObject(this.bucket, file, content);
+    public async put(file: string, content: string){
+        try {
+            return await this.client.putObject(this.bucket, file, content);
+        } catch (err) {
+            console.error('Error putting file to Minio:', err);
+            throw err;
+        }
     }
 
-    public putFileAs(filePath: string, name: string){
-        return this.client.fPutObject(this.bucket, name, filePath);
+    public async putFileAs(filePath: string, name: string){
+        try {
+            return await this.client.fPutObject(this.bucket, name, filePath);
+        } catch (err) {
+            console.error('Error putting file to Minio:', err);
+            throw err;
+        }
     }
 
-    public putFile(filePath: string){
-        return this.client.fPutObject(this.bucket, filePath, filePath);
+    public async putFile(filePath: string){
+        try {
+            // Get the file name from the filePath
+            const fileName = filePath.split('/').pop() || '';
+
+            return await this.client.fPutObject(this.bucket, fileName, filePath);
+        } catch (err) {
+            console.error('Error putting file to Minio:', err);
+            throw err;
+        }
     }
 
-    public async get(file: string){
-        return this.client.getObject(this.bucket, file);
+    public async get(file: string): Promise<Buffer>{
+        try {
+            const stream = await this.client.getObject(this.bucket, file);
+            let fileData = Buffer.from('');
+
+            stream.on('data', (chunk: any) => {
+                fileData = Buffer.concat([fileData, chunk]);
+            });
+
+            return new Promise((resolve, reject) => {
+                stream.on('end', () => {
+                    resolve(fileData);
+                });
+
+                stream.on('error', (err) => {
+                    reject(err);
+                });
+            });
+        } catch (err) {
+            console.error('Error getting file from Minio:', err);
+            throw err;
+        }
     }
 
     public getStat(file: string){
@@ -71,6 +109,10 @@ class MinioManager {
         return this.getStat(file).then((stat) => stat.lastModified);
     }
 
+    public versionId(file: string){
+        return this.getStat(file).then((stat) => stat.versionId);
+    }
+
     public exists(file: string) {
 
     }
@@ -81,6 +123,10 @@ class MinioManager {
 
     public url(file: string){
         return `${this.baseUrl}/${this.bucket}/${file}`;
+    }
+
+    public path(file: string){
+        return `${this.bucket}/${file}`;
     }
 }
 
