@@ -11,9 +11,6 @@ assignees: ''
 
 **Feedback and Suggestions**
 
-**Name**:
-[Provide your name or username (optional).]
-
 **Feedback**:
 [Share your feedback or suggestions for the project here.]
 
