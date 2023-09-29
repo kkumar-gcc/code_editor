@@ -1,14 +1,14 @@
 'use client'
 import {SessionProvider} from "next-auth/react";
 import React from "react";
-import {GeistProvider} from "@geist-ui/core";
+import {NextUIProvider} from "@nextui-org/react";
 
 export function Providers({children}: { children: React.ReactNode }) {
     return (
-        <GeistProvider>
+        <NextUIProvider className={"w-full min-h-screen"}>
             <SessionProvider>
-                    {children}
+                {children}
             </SessionProvider>
-        </GeistProvider>
+        </NextUIProvider>
     )
 }

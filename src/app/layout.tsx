@@ -3,6 +3,7 @@ import type {Metadata} from "next";
 import {Inter} from "next/font/google";
 import {Providers} from "@/app/providers";
 import React from "react";
+import Navbar from "@/components/navbar"
 const inter = Inter({subsets: ["latin"]});
 
 export const metadata: Metadata = {
@@ -16,11 +17,10 @@ export default async function RootLayout({children, modal}: {
 }) {
     return (
         <html lang="en">
-            <body className={`{inter.className} flex items-center justify-center`}>
+            <body className={`flex items-center justify-center flex-col`}>
             <Providers>
-                <div className="container">
-                    {children}
-                </div>
+                <Navbar />
+                {children}
                 {modal}
             </Providers>
             </body>

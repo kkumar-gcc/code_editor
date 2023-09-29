@@ -1,6 +1,7 @@
 import {Client} from "minio";
 
-class MinioManager {
+// We are using Minio for disk
+class DiskManager {
     private readonly client: Client;
     private bucket: string;
     private region: string;
@@ -130,6 +131,6 @@ class MinioManager {
     }
 }
 
-const minioManager = new MinioManager();
+const diskManager = new DiskManager();
 
-export default minioManager;
+export default diskManager;
