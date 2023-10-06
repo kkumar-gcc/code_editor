@@ -12,6 +12,7 @@ import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
 import {useCustomForm} from "@/hooks/useCustomForm";
 import {CustomError} from "@/types/customError";
+import Errors from "@/components/errors";
 
 export default function DeleteFile(props: UseDisclosureProps & { file: any | null }) {
     const router = useRouter();
@@ -50,11 +51,7 @@ export default function DeleteFile(props: UseDisclosureProps & { file: any | nul
                             <form onSubmit={handleSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.map((error, index) => (
-                                        <p key={index}>
-                                            {error.message}
-                                        </p>
-                                    ))}
+                                    <Errors errors={errors} />
                                     <p>Do you really want to delete this file?</p>
                                 </ModalBody>
                                 <ModalFooter>

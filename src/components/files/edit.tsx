@@ -14,6 +14,7 @@ import {File as FileIcon} from "@geist-ui/icons";
 import {useRouter} from "next/navigation";
 import {useCustomForm} from "@/hooks/useCustomForm";
 import {CustomError} from "@/types/customError";
+import Errors from "@/components/errors";
 
 export default function EditFile(props: UseDisclosureProps & { file: any | null }) {
     const router = useRouter();
@@ -68,11 +69,7 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                             <form onSubmit={handleSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Edit file</ModalHeader>
                                 <ModalBody>
-                                    {errors.map((error, index) => (
-                                        <p key={index}>
-                                            {error.message}
-                                        </p>
-                                    ))}
+                                    <Errors errors={errors} />
                                     <Input
                                         autoFocus
                                         endContent={

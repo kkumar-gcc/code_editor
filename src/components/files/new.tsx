@@ -1,19 +1,12 @@
 "use client"
 import React from "react";
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    Input
-} from "@nextui-org/react";
+import {Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
 import {File as FileIcon} from "@geist-ui/icons";
 import {useCustomForm} from "@/hooks/useCustomForm";
 import {CustomError} from "@/types/customError";
+import Errors from "@/components/errors";
 
 export default function NewFile(props: UseDisclosureProps & { parentId: string | null }) {
     const router = useRouter();
@@ -82,11 +75,7 @@ export default function NewFile(props: UseDisclosureProps & { parentId: string |
                             <form onSubmit={handleSubmit}>
                             <ModalHeader className="flex flex-col gap-1">Upload a file</ModalHeader>
                             <ModalBody>
-                                {errors.map((error, index) => (
-                                    <p key={index}>
-                                        {error.message}
-                                    </p>
-                                ))}
+                                <Errors errors={errors} />
                                 <Input
                                     type={"file"}
                                     label="File"
@@ -98,9 +87,9 @@ export default function NewFile(props: UseDisclosureProps & { parentId: string |
                                     onChange={handleChange}
                                 />
                                 <label
-                                    className="bg-skin-base  capatalize py-2 px-4 leading-6  border inline-flex flex-row justify-center items-center no-underline rounded-md font-semibold cursor-pointer transition duration-200 ease-in-out shadow-sm shadow-gray-100"
+                                    className="z-0 group relative inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 px-unit-4 min-w-unit-20 h-unit-10 text-small gap-unit-2 [&>svg]:max-w-[theme(spacing.unit-8)] data-[pressed=true]:scale-[0.97] transition-transform-colors motion-reduce:transition-none text-default-foreground bg-white border shadow rounded-lg hover:cursor-pointer"
                                     htmlFor={"file_upload"}>
-                                    change
+                                    {state.file ? state.name : "Select a file"}
                                 </label>
                                 {state.file && (
                                 <Input

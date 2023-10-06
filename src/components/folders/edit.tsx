@@ -14,6 +14,7 @@ import {Folder as FolderIcon} from "@/components/geist-ui/icons";
 import {useRouter} from "next/navigation";
 import {useCustomForm} from "@/hooks/useCustomForm";
 import {CustomError} from "@/types/customError";
+import Errors from "@/components/errors";
 
 export default function EditFolder(props: UseDisclosureProps & { folder: any | null }) {
     const router = useRouter();
@@ -55,11 +56,7 @@ export default function EditFolder(props: UseDisclosureProps & { folder: any | n
                             <form onSubmit={handleSubmit} action={"/api/folders"}>
                                 <ModalHeader className="flex flex-col gap-1">Edit the folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.map((error, index) => (
-                                        <p key={index}>
-                                            {error.message}
-                                        </p>
-                                    ))}
+                                    <Errors errors={errors} />
                                     <Input
                                         autoFocus
                                         endContent={
