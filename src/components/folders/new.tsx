@@ -12,35 +12,19 @@ import {
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {Folder as FolderIcon} from "@/components/geist-ui/icons";
 import {useRouter} from "next/navigation";
+import {CustomError} from "@/types/customError"
+import {useCustomForm} from "@/hooks/useCustomForm";
 
 export default function NewFolder(props: UseDisclosureProps & { parentId: string | null }) {
     const router = useRouter();
-    const [formData, setFormData] = React.useState({
-        name: ""
-    });
 
-    const [errors , setErrors] = React.useState({} as any);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(true);
+    const { errors, isSubmitting, isDisabled, handleChange, handleSubmit, resetForm } = useCustomForm(
+        {
+            name: "",
+        },
+        async (formData, setError) => {
+            let formURL = `/api/folders/${props.parentId ?? ''}`;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 0) {
-            setIsDisabled(false);
-        } else {
-            setIsDisabled(true);
-        }
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    }
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        let formURL = `/api/folders/${props.parentId?? ''}`;
-
-        try {
             const res = await fetch(formURL, {
                 method: "POST",
                 body: JSON.stringify(formData),
@@ -53,23 +37,15 @@ export default function NewFolder(props: UseDisclosureProps & { parentId: string
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
+            } else {
+                setError(new CustomError("An error occurred while creating the folder."));
             }
-        } catch (e) {
-            console.error(e);
-            setErrors({message:"An error occurred while creating the folder."});
-        } finally {
-            setIsSubmitting(false);
         }
-    }
+    );
 
     React.useEffect(() => {
-        setFormData({
-            name: "",
-        });
-        setIsDisabled(true);
-        setIsSubmitting(false);
-        setErrors({});
-    }, [props.isOpen, props.parentId]);
+        resetForm();
+    },[props.isOpen, props.parentId]);
 
     return (
         <>
@@ -80,11 +56,11 @@ export default function NewFolder(props: UseDisclosureProps & { parentId: string
                             <form onSubmit={handleSubmit} action={"/api/folders"}>
                                 <ModalHeader className="flex flex-col gap-1">Create a folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.message && (
-                                        <p className="mb-3 text-red-600">
-                                            {errors.message}
+                                    {errors.map((error, index) => (
+                                        <p key={index}>
+                                            {error.message}
                                         </p>
-                                    )}
+                                    ))}
                                     <Input
                                         autoFocus
                                         endContent={

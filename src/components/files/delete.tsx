@@ -10,22 +10,18 @@ import {
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
+import {useCustomForm} from "@/hooks/useCustomForm";
+import {CustomError} from "@/types/customError";
 
 export default function DeleteFile(props: UseDisclosureProps & { file: any | null }) {
     const router = useRouter();
-    const [fileId, setFolderId] = React.useState();
+    const {state, errors, isSubmitting, isDisabled, handleSubmit, resetForm, setIsDisabled } = useCustomForm(
+        {
+            fileId: props.file?.id,
+        },
+        async (formData, setError) => {
+            const formURL = `/api/files/${state.fileId}`;
 
-    const [errors , setErrors] = React.useState({} as any);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(false);
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsDisabled(true);
-        setIsSubmitting(true);
-        const formURL = `/api/files/${fileId}`;
-
-        try {
             const res = await fetch(formURL, {
                 method: "DELETE",
             });
@@ -34,23 +30,16 @@ export default function DeleteFile(props: UseDisclosureProps & { file: any | nul
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
+            } else {
+                setError(new CustomError("An error occurred while deleting the file."));
             }
-        } catch (error) {
-            console.error(error);
-            setErrors({ message: "An error occurred while deleting the file." });
-        } finally {
-            setIsDisabled(false);
-            setIsSubmitting(false);
         }
-    }
+    );
 
-    // Use useEffect to reset folderId when the component is unmounted
     React.useEffect(() => {
-        setFolderId(props.file?.id);
+        resetForm();
         setIsDisabled(false);
-        setIsSubmitting(false);
-        setErrors({});
-    }, [props.isOpen, props.file]);
+    },[props.isOpen, props.file]);
 
     return (
         <>
@@ -61,11 +50,11 @@ export default function DeleteFile(props: UseDisclosureProps & { file: any | nul
                             <form onSubmit={handleSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.message && (
-                                        <p className="mb-3 text-red-600">
-                                            {errors.message}
+                                    {errors.map((error, index) => (
+                                        <p key={index}>
+                                            {error.message}
                                         </p>
-                                    )}
+                                    ))}
                                     <p>Do you really want to delete this file?</p>
                                 </ModalBody>
                                 <ModalFooter>

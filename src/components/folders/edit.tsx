@@ -12,36 +12,18 @@ import {
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {Folder as FolderIcon} from "@/components/geist-ui/icons";
 import {useRouter} from "next/navigation";
+import {useCustomForm} from "@/hooks/useCustomForm";
+import {CustomError} from "@/types/customError";
 
 export default function EditFolder(props: UseDisclosureProps & { folder: any | null }) {
     const router = useRouter();
-    const [formData, setFormData] = React.useState({
-        name: "",
-    });
+    const { state, errors, isSubmitting, isDisabled, handleChange, handleSubmit, resetForm } = useCustomForm(
+        {
+            name: props.folder?.name,
+        },
+        async (formData, setError) => {
+            const formURL = `/api/folders/${props.folder.id}`;
 
-    const [errors , setErrors] = React.useState({} as any);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(true);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 0) {
-            setIsDisabled(false);
-        } else {
-            setIsDisabled(true);
-        }
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    }
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-
-        const formURL = `/api/folders/${props.folder.id}`;
-
-        try {
             const res = await fetch(formURL, {
                 method: "PUT",
                 body: JSON.stringify(formData),
@@ -54,23 +36,15 @@ export default function EditFolder(props: UseDisclosureProps & { folder: any | n
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
+            } else {
+                setError(new CustomError("An error occurred while editing the folder."));
             }
-        }catch (err) {
-            console.error(err);
-            setErrors({message:"An error occurred while editing the folder."});
-        }finally {
-            setIsSubmitting(false);
         }
-    }
+    );
 
-    // Use useEffect to reset folderId when the component is unmounted
     React.useEffect(() => {
-        setFormData({
-            name: props.folder?.name,
-        });
-        setIsDisabled(true);
-        setIsSubmitting(false);
-    }, [props.isOpen, props.folder]);
+        resetForm();
+    },[props.isOpen, props.folder]);
 
     return (
         <>
@@ -81,11 +55,11 @@ export default function EditFolder(props: UseDisclosureProps & { folder: any | n
                             <form onSubmit={handleSubmit} action={"/api/folders"}>
                                 <ModalHeader className="flex flex-col gap-1">Edit the folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.message && (
-                                        <p className="mb-3 text-red-600">
-                                            {errors.message}
+                                    {errors.map((error, index) => (
+                                        <p key={index}>
+                                            {error.message}
                                         </p>
-                                    )}
+                                    ))}
                                     <Input
                                         autoFocus
                                         endContent={
@@ -95,7 +69,7 @@ export default function EditFolder(props: UseDisclosureProps & { folder: any | n
                                         placeholder="Enter your folder name"
                                         variant="bordered"
                                         name="name"
-                                        value={formData.name}
+                                        value={state.name}
                                         onChange={handleChange}
                                     />
                                 </ModalBody>

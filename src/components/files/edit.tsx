@@ -10,37 +10,20 @@ import {
     Input
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
-import {Folder as FolderIcon} from "@geist-ui/icons";
+import {File as FileIcon} from "@geist-ui/icons";
 import {useRouter} from "next/navigation";
+import {useCustomForm} from "@/hooks/useCustomForm";
+import {CustomError} from "@/types/customError";
 
 export default function EditFile(props: UseDisclosureProps & { file: any | null }) {
     const router = useRouter();
-    const [formData, setFormData] = React.useState({
-        name: '',
-    });
+    const { state, setState, errors, isSubmitting, isDisabled, setIsDisabled, handleSubmit, resetForm } = useCustomForm(
+        {
+            name: props.file?.name,
+        },
+        async (formData, setError) => {
+            const formURL = `/api/files/${props.file.id}`;
 
-    const [errors , setErrors] = React.useState({} as any);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(true);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 0 && e.target.value !== props.file.name) {
-            setIsDisabled(false);
-        } else {
-            setIsDisabled(true);
-        }
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    }
-
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        const formURL = `/api/files/${props.file.id}`;
-
-        try {
             const res = await fetch(formURL, {
                 method: "PUT",
                 body: JSON.stringify(formData),
@@ -53,24 +36,28 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
+            } else {
+                setError(new CustomError("An error occurred while editing the file."));
             }
-        } catch (err) {
-            console.error(err);
-            setErrors({message:"An error occurred while editing the file."});
-        } finally {
-            setIsSubmitting(false);
         }
-    };
+    );
 
-    // Use useEffect to reset folderId when the component is unmounted
-    React.useEffect(() => {
-        setFormData({
-            name: props.file?.name,
+    // custom handle change
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value.length > 0 && e.target.value !== props.file.name) {
+            setIsDisabled(false);
+        } else {
+            setIsDisabled(true);
+        }
+        setState({
+            ...state,
+            [e.target.name]: e.target.value,
         });
-        setIsDisabled(true);
-        setIsSubmitting(false);
-        setErrors({});
-    }, [props.isOpen, props.file]);
+    }
+
+    React.useEffect(() => {
+        resetForm();
+    },[props.isOpen, props.file]);
 
     return (
         <>
@@ -81,21 +68,21 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                             <form onSubmit={handleSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Edit file</ModalHeader>
                                 <ModalBody>
-                                    {errors.message && (
-                                        <p className="mb-3 text-red-600">
-                                            {errors.message}
+                                    {errors.map((error, index) => (
+                                        <p key={index}>
+                                            {error.message}
                                         </p>
-                                    )}
+                                    ))}
                                     <Input
                                         autoFocus
                                         endContent={
-                                            <FolderIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
+                                            <FileIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
                                         }
                                         label="Name"
                                         placeholder="Enter your file name"
                                         variant="bordered"
                                         name="name"
-                                        value={formData.name}
+                                        value={state.name}
                                         onChange={handleChange}
                                     />
                                 </ModalBody>

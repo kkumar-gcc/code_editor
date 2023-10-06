@@ -11,53 +11,28 @@ import {
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
-import {Folder as FolderIcon} from "@geist-ui/icons";
+import {File as FileIcon} from "@geist-ui/icons";
+import {useCustomForm} from "@/hooks/useCustomForm";
+import {CustomError} from "@/types/customError";
 
 export default function NewFile(props: UseDisclosureProps & { parentId: string | null }) {
     const router = useRouter();
-    const [formData, setFormData] = React.useState({
-        name: "",
-        file: null,
-    });
 
-    const [errors , setErrors] = React.useState({} as any);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(true);
+    const { state, setState, errors, isSubmitting, isDisabled, setIsDisabled, handleSubmit, resetForm } = useCustomForm(
+        {
+            name: "",
+            file: null,
+        },
+        async (formData, setError) => {
+            if (!formData.file) {
+                return;
+            }
+            let formURL = `/api/files/${props.parentId ?? ''}`;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 0) {
-            setIsDisabled(false);
-        } else {
-            setIsDisabled(true);
-        }
-        if (e.target.type === "file" && e.target.files) {
-            const file = e.target.files[0];
-            setFormData({
-                ...formData,
-                [e.target.name]: file,
-                ["name"]: file?.name,
-            });
-            return;
-        }
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    }
+            const data = new FormData();
+            data.set('name', formData.name);
+            data.set('file', formData.file);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        if (!formData.file) {
-            return;
-        }
-        let formURL = `/api/files/${props.parentId ?? ''}`;
-
-        const data = new FormData();
-        data.set('name', formData.name);
-        data.set('file', formData.file);
-
-        try {
             const res = await fetch(formURL, {
                 method: 'POST',
                 body: data,
@@ -67,25 +42,37 @@ export default function NewFile(props: UseDisclosureProps & { parentId: string |
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
+            } else {
+                setError(new CustomError("An error occurred while uploading the file."));
             }
-        } catch (error) {
-            console.error('An error occurred:', error);
-            setErrors({message:"An error occurred while uploading the file."});
-        } finally {
-            setIsSubmitting(false);
         }
-    };
+    );
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value.length > 0) {
+            setIsDisabled(false);
+        } else {
+            setIsDisabled(true);
+        }
+        if (e.target.type === "file" && e.target.files) {
+            const file = e.target.files[0];
+            setState({
+                ...state,
+                [e.target.name]: file,
+                ["name"]: file?.name,
+            });
+            return;
+        }
+        setState({
+            ...state,
+            [e.target.name]: e.target.value,
+        });
+    }
 
     React.useEffect(() => {
-        setFormData({
-            name: "",
-            file: null,
-        });
-        setIsDisabled(true)
-        setIsSubmitting(false)
-        setErrors({})
+        resetForm()
     },[props.isOpen, props.parentId]);
+    
     return (
         <>
             <Modal backdrop="blur" isOpen={props.isOpen} onClose={props.onClose}>
@@ -95,30 +82,37 @@ export default function NewFile(props: UseDisclosureProps & { parentId: string |
                             <form onSubmit={handleSubmit}>
                             <ModalHeader className="flex flex-col gap-1">Upload a file</ModalHeader>
                             <ModalBody>
-                                {errors.message && (
-                                    <p className="mb-3 text-red-600">
-                                        {errors.message}
+                                {errors.map((error, index) => (
+                                    <p key={index}>
+                                        {error.message}
                                     </p>
-                                )}
+                                ))}
                                 <Input
                                     type={"file"}
                                     label="File"
                                     placeholder="Select a file"
                                     variant="bordered"
                                     name="file"
+                                    id={"file_upload"}
+                                    className={"sr-only"}
                                     onChange={handleChange}
                                 />
-                                {formData.file && (
+                                <label
+                                    className="bg-skin-base  capatalize py-2 px-4 leading-6  border inline-flex flex-row justify-center items-center no-underline rounded-md font-semibold cursor-pointer transition duration-200 ease-in-out shadow-sm shadow-gray-100"
+                                    htmlFor={"file_upload"}>
+                                    change
+                                </label>
+                                {state.file && (
                                 <Input
                                     autoFocus
                                     endContent={
-                                        <FolderIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
+                                        <FileIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
                                     }
                                     label="Name"
                                     placeholder="Enter your file name"
                                     variant="bordered"
                                     name="name"
-                                    value={formData.name}
+                                    value={state.name}
                                     onChange={handleChange}
                                 />
                                     )}

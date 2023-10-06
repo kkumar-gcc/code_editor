@@ -10,22 +10,19 @@ import {
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
+import {useCustomForm} from "@/hooks/useCustomForm";
+import {CustomError} from "@/types/customError";
 
 export default function DeleteFolder(props: UseDisclosureProps & { folder: any | null }) {
     const router = useRouter();
-    const [folderId, setFolderId] = React.useState();
 
-    const [errors , setErrors] = React.useState({} as any);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(false);
+    const {errors, isSubmitting, isDisabled, handleSubmit, resetForm, setIsDisabled } = useCustomForm(
+        {
+            folderId: props.folder?.id,
+        },
+        async (formData, setError) => {
+            const formURL = `/api/folders/${props.folder.id}`;
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsDisabled(true);
-        setIsSubmitting(true);
-        const formURL = `/api/folders/${folderId}`;
-
-        try {
             const res = await fetch(formURL, {
                 method: "DELETE",
             });
@@ -34,23 +31,16 @@ export default function DeleteFolder(props: UseDisclosureProps & { folder: any |
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
+            } else {
+                setError(new CustomError("An error occurred while deleting the folder."));
             }
-        } catch (error) {
-            console.error(error);
-            setErrors({ message: "An error occurred while deleting the folder." });
-        }finally {
-            setIsDisabled(false);
-            setIsSubmitting(false);
         }
-    }
+    );
 
-    // Use useEffect to reset folderId when the component is unmounted
     React.useEffect(() => {
-        setFolderId(props.folder?.id);
+        resetForm();
         setIsDisabled(false);
-        setIsSubmitting(false);
-        setErrors({});
-    }, [props.folder]);
+    },[props.isOpen, props.folder]);
 
     return (
         <>
@@ -61,11 +51,11 @@ export default function DeleteFolder(props: UseDisclosureProps & { folder: any |
                             <form onSubmit={handleSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.message && (
-                                        <p className="mb-3 text-red-600">
-                                            {errors.message}
+                                    {errors.map((error, index) => (
+                                        <p key={index}>
+                                            {error.message}
                                         </p>
-                                    )}
+                                    ))}
                                     <p>Do you really want to delete this folder?</p>
                                 </ModalBody>
                                 <ModalFooter>
