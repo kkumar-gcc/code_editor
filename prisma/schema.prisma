@@ -48,10 +48,13 @@ model File {
   name      String
   path      String
   size      Int
+  mimeType  String
+  etag      String
+  versionId String?
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   folderId  String?
-  folder    Folder?   @relation(fields: [folderId], references: [id])
+  folder    Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -64,7 +67,7 @@ model Folder {
   user       User      @relation(fields: [userId], references: [id])
   files      File[]
   parentId   String?
-  parent     Folder?   @relation("Subfolder", fields: [parentId], references: [id])
+  parent     Folder?   @relation("Subfolder", fields: [parentId], references: [id], onDelete: Cascade)
   subfolders Folder[]  @relation("Subfolder")
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -77,7 +80,7 @@ model Setting {
   fontSize   Int?
   fontFamily String?
   userId     String  @unique
-  user       User    @relation(fields: [userId], references: [id])
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
