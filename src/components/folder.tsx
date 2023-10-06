@@ -15,22 +15,21 @@ import { DateTime } from "luxon";
 import Link from "next/link";
 import { File as FileIcon, Folder as FolderIcon, MoreHorizontal, Plus, Trash2, Edit } from '@/components/geist-ui/icons';
 import NewFolder from "@/components/folders/new";
-import { useRouter } from 'next/navigation'
 import NewFile from "@/components/files/new";
 import EditFolder from "@/components/folders/edit";
 import EditFile from "@/components/files/edit";
+import DeleteFolder from "@/components/folders/delete";
+import DeleteFile from "@/components/files/delete";
 
-export default function Folder({folders, files}:{folders: any, files: any}) {
-    const router = useRouter()
+export default function Folder({folders, files, parentId}:{folders: any, files: any, parentId: string | null}) {
     const newFolder = useDisclosure();
     const newFile = useDisclosure();
     const editFolder = useDisclosure();
     const editFile = useDisclosure();
+    const deleteFile = useDisclosure();
+    const deleteFolder = useDisclosure();
     const [file, setFile] = React.useState(null);
     const [folder, setFolder] = React.useState(null);
-    function triggerAction(key: any) {
-        alert(key)
-    }
 
     async function handleEditFolder (folder: any){
         setFolder(folder)
@@ -40,6 +39,16 @@ export default function Folder({folders, files}:{folders: any, files: any}) {
     function handleEditFile(file: any) {
         setFile(file);
         editFile.onOpen()
+    }
+
+    async function handleDeleteFolder (folder: any){
+        setFolder(folder)
+        deleteFolder.onOpen()
+    }
+
+    function handleDeleteFile(file: any) {
+        setFile(file);
+        deleteFile.onOpen()
     }
 
     return <div>
@@ -86,7 +95,7 @@ export default function Folder({folders, files}:{folders: any, files: any}) {
                                     <DropdownItem key="edit_folder" startContent={<Edit size={18}/> } onPress={()=>handleEditFolder(folder)} >
                                         Edit folder
                                     </DropdownItem>
-                                    <DropdownItem className={"text-red-600"} key="delete_folder" color={"danger"} startContent={<Trash2 size={18}/>} onPress={newFile.onOpen}>Delete folder</DropdownItem>
+                                    <DropdownItem className={"text-red-600"} key="delete_folder" color={"danger"} startContent={<Trash2 size={18}/>} onPress={()=>handleDeleteFolder(folder)}>Delete folder</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
                             </TableCell>
@@ -107,7 +116,7 @@ export default function Folder({folders, files}:{folders: any, files: any}) {
                                     <DropdownItem key="edit_file" startContent={<Edit size={18}/> } onPress={()=>handleEditFile(file)} >
                                         Edit file
                                     </DropdownItem>
-                                    <DropdownItem className={"text-red-600"} key="delete_file" startContent={<Trash2 size={18}/>} onPress={newFile.onOpen}>Delete file</DropdownItem>
+                                    <DropdownItem className={"text-red-600"} key="delete_file" startContent={<Trash2 size={18}/>} onPress={()=>handleDeleteFile(file)}>Delete file</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown></TableCell>
                         </TableRow>
@@ -116,9 +125,11 @@ export default function Folder({folders, files}:{folders: any, files: any}) {
         </Table>
 
         {/* Models for this page */}
-        <NewFolder isOpen={newFolder.isOpen} onClose={newFolder.onClose} onOpen={newFolder.onOpen} publicId={null} />
-        <NewFile isOpen={newFile.isOpen} onClose={newFile.onClose} onOpen={newFile.onOpen} publicId={null}/>
+        <NewFolder isOpen={newFolder.isOpen} onClose={newFolder.onClose} onOpen={newFolder.onOpen} parentId={parentId} />
+        <NewFile isOpen={newFile.isOpen} onClose={newFile.onClose} onOpen={newFile.onOpen} parentId={parentId}/>
         <EditFile isOpen={editFile.isOpen} onClose={editFile.onClose} onOpen={editFile.onOpen} file={file}/>
         <EditFolder isOpen={editFolder.isOpen} onClose={editFolder.onClose} onOpen={editFolder.onOpen} folder={folder} />
+        <DeleteFile isOpen={deleteFile.isOpen} onClose={deleteFile.onClose} onOpen={deleteFile.onOpen} file={file} />
+        <DeleteFolder isOpen={deleteFolder.isOpen} onClose={deleteFolder.onClose} onOpen={deleteFolder.onOpen} folder={folder} />
     </div>
 }

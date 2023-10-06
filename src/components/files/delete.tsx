@@ -7,46 +7,27 @@ import {
     ModalBody,
     ModalFooter,
     Button,
-    Input
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
-import {Folder as FolderIcon} from "@geist-ui/icons";
 import {useRouter} from "next/navigation";
 
-export default function EditFile(props: UseDisclosureProps & { file: any | null }) {
+export default function DeleteFile(props: UseDisclosureProps & { file: any | null }) {
     const router = useRouter();
-    const [formData, setFormData] = React.useState({
-        name: '',
-    });
+    const [fileId, setFolderId] = React.useState();
 
     const [errors , setErrors] = React.useState({} as any);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
-    const [isDisabled, setIsDisabled] = React.useState(true);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 0 && e.target.value !== props.file.name) {
-            setIsDisabled(false);
-        } else {
-            setIsDisabled(true);
-        }
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    }
+    const [isDisabled, setIsDisabled] = React.useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsDisabled(true);
         setIsSubmitting(true);
-        const formURL = `/api/files/${props.file.id}`;
+        const formURL = `/api/files/${fileId}`;
 
         try {
             const res = await fetch(formURL, {
-                method: "PUT",
-                body: JSON.stringify(formData),
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                method: "DELETE",
             });
 
             if (res.status === 200) {
@@ -54,20 +35,19 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                 props.onClose();
                 router.refresh();
             }
-        } catch (err) {
-            console.error(err);
-            setErrors({message:"An error occurred while editing the file."});
+        } catch (error) {
+            console.error(error);
+            setErrors({ message: "An error occurred while deleting the file." });
         } finally {
+            setIsDisabled(false);
             setIsSubmitting(false);
         }
-    };
+    }
 
     // Use useEffect to reset folderId when the component is unmounted
     React.useEffect(() => {
-        setFormData({
-            name: props.file?.name,
-        });
-        setIsDisabled(true);
+        setFolderId(props.file?.id);
+        setIsDisabled(false);
         setIsSubmitting(false);
         setErrors({});
     }, [props.isOpen, props.file]);
@@ -79,29 +59,18 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                     {(onClose) => (
                         <>
                             <form onSubmit={handleSubmit}>
-                                <ModalHeader className="flex flex-col gap-1">Edit file</ModalHeader>
+                                <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
                                 <ModalBody>
                                     {errors.message && (
                                         <p className="mb-3 text-red-600">
                                             {errors.message}
                                         </p>
                                     )}
-                                    <Input
-                                        autoFocus
-                                        endContent={
-                                            <FolderIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
-                                        }
-                                        label="Name"
-                                        placeholder="Enter your file name"
-                                        variant="bordered"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                    />
+                                    <p>Do you really want to delete this file?</p>
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={isDisabled} isLoading={isSubmitting}>
-                                        Edit
+                                        Delete
                                     </Button>
                                     <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
                                         Cancel

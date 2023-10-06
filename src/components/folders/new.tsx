@@ -7,18 +7,16 @@ import {
     ModalBody,
     ModalFooter,
     Button,
-    Input,
-    Spinner
+    Input
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {Folder as FolderIcon} from "@/components/geist-ui/icons";
 import {useRouter} from "next/navigation";
 
-export default function NewFolder(props: UseDisclosureProps & { publicId: string | null }) {
+export default function NewFolder(props: UseDisclosureProps & { parentId: string | null }) {
     const router = useRouter();
     const [formData, setFormData] = React.useState({
-        name: "",
-        parentId: props.publicId,
+        name: ""
     });
 
     const [errors , setErrors] = React.useState({} as any);
@@ -37,28 +35,41 @@ export default function NewFolder(props: UseDisclosureProps & { publicId: string
         });
     }
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
-        const formURL = "/api/folders";
+        let formURL = `/api/folders/${props.parentId?? ''}`;
 
-        fetch(formURL, {
-            method: "POST",
-            body: JSON.stringify(formData),
-            headers: {
-                ContentType: "application/json",
-            }
-        }).then((res) => {
+        try {
+            const res = await fetch(formURL, {
+                method: "POST",
+                body: JSON.stringify(formData),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
             if (res.status === 200) {
-                setIsSubmitting(false);
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
             }
-        }).catch((err) => {
-            console.log(err)
-        })
+        } catch (e) {
+            console.error(e);
+            setErrors({message:"An error occurred while creating the folder."});
+        } finally {
+            setIsSubmitting(false);
+        }
     }
+
+    React.useEffect(() => {
+        setFormData({
+            name: "",
+        });
+        setIsDisabled(true);
+        setIsSubmitting(false);
+        setErrors({});
+    }, [props.isOpen, props.parentId]);
 
     return (
         <>
@@ -69,6 +80,11 @@ export default function NewFolder(props: UseDisclosureProps & { publicId: string
                             <form onSubmit={handleSubmit} action={"/api/folders"}>
                                 <ModalHeader className="flex flex-col gap-1">Create a folder</ModalHeader>
                                 <ModalBody>
+                                    {errors.message && (
+                                        <p className="mb-3 text-red-600">
+                                            {errors.message}
+                                        </p>
+                                    )}
                                     <Input
                                         autoFocus
                                         endContent={
@@ -82,8 +98,8 @@ export default function NewFolder(props: UseDisclosureProps & { publicId: string
                                     />
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={isDisabled}>
-                                        {isSubmitting ? <Spinner /> + "Creating": "Create"}
+                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={isDisabled} isLoading={isSubmitting}>
+                                        Create
                                     </Button>
                                     <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
                                         Cancel

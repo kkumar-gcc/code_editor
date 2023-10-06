@@ -40,7 +40,7 @@ class DiskManager {
         return this.client.removeObjects(this.bucket, files);
     }
 
-    public async put(file: string, content: string){
+    public async put(file: string, content: string | Buffer){
         try {
             return await this.client.putObject(this.bucket, file, content);
         } catch (err) {
