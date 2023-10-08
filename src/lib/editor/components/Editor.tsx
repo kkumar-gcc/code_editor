@@ -58,7 +58,7 @@ export default function Editor({
     const handleChange = useCallback(() => {
         console.log(onChangeRef.current, isEditorReady)
         if (isEditorReady && onChangeRef.current) {
-            const newContent = editorRef.current.textContent;
+            const newContent = editorRef.current.innerText;
             valueRef.current = newContent; // Update the stored value
             onChangeRef.current(newContent);
         }
