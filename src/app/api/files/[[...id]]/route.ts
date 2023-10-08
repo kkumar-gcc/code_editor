@@ -97,6 +97,46 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
+export async function PATCH(req: NextRequest, { params }: { params: { id: string }}){
+    const token = await getToken({ req: req });
+
+    if (!token || token?.sub == null) {
+        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
+    }
+
+    if (!params.id) {
+        return NextResponse.json({ message: "id is required!" }, { status: 400 });
+    }
+
+    const { content } = await req.json();
+
+    try {
+        const file = await prisma.file.findFirst({
+            where: {
+                id: params.id[0],
+                userId: token?.sub,
+            },
+        });
+
+        if (!file) {
+            return NextResponse.json({ message: "File not found!" }, { status: 404 });
+        }
+
+        await disk.put(file.path, Buffer.from(content));
+
+        return NextResponse.json(
+            {
+                message: "file updated!",
+                file: file,
+            },
+            { status: 200 },
+        );
+    } catch (error) {
+        console.error("Error:", error);
+        return NextResponse.json({ message: "An error occurred." }, { status: 500 });
+    }
+}
+
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     const token = await getToken({ req: req });
 
