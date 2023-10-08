@@ -1,61 +1,151 @@
-import React, { useState, useRef } from 'react';
+"use client"
 
-export default function Editor (){
-  const [content, setContent] = useState();
-  const contentEditableRef = useRef(null);
-  const undoStackRef = useRef([]);
-  const redoStackRef = useRef([]);
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import EditorProps from './EditorProps';
+import styles from "./styles";
+import "./Editor.css";
+import contentEditableDiv from "../utils/contentEditableUtils";
 
-  const handleUndo = () => {
-    if (undoStackRef.current.length > 0) {
-      const previousContent = undoStackRef.current.pop();
-      redoStackRef.current.push(content);
-      setContent(previousContent);
-    }
-  };
+export default function Editor({
+                                   defaultValue,
+                                   defaultLanguage,
+                                   value,
+                                   language,
+                                   theme,
+                                   line,
+                                   loading = "Loading...",
+                                   width,
+                                   height,
+                                   className,
+                                   readOnly = false,
+                                   onChange,
+                                   onSave,
+                                   onFind,
+                                   onReplace,
+                                   onMount,
+                                   onValidate
+                               }: EditorProps
+) {
+    const [isEditorReady, setIsEditorReady] = useState(false);
+    const [isEditorMounting, setIsEditorMounting] = useState(true);
+    const editorRef = useRef<any>(null);
+    const containerRef = useRef<any>(null);
+    const onMountRef = useRef(onMount);
+    const onChangeRef = useRef(onChange);
+    const onSaveRef = useRef(onSave);
+    const onFindRef = useRef(onFind);
+    const onReplaceRef = useRef(onReplace);
+    const onValidateRef = useRef(onValidate);
+    const valueRef = useRef(value);
+    const languageRef = useRef(language);
+    const themeRef = useRef(theme);
+    const lineRef = useRef(line);
+    const gutterRef = useRef<any>(null)
+    
+    useEffect(() => {
+        onMountRef.current = onMount;
+        onChangeRef.current = onChange;
+        onSaveRef.current = onSave;
+        onFindRef.current = onFind;
+        onReplaceRef.current = onReplace;
+        onValidateRef.current = onValidate;
+    }, [onMount, onChange, onSave, onFind, onReplace, onValidate]);
 
-  const handleRedo = () => {
-    if (redoStackRef.current.length > 0) {
-      const nextContent = redoStackRef.current.pop();
-      undoStackRef.current.push(content);
-      setContent(nextContent);
-    }
-  };
+    useEffect(() => {
+        createEditor();
+    }, []);
 
-  const handleSave = () => {
-    // You can replace this logic with saving the content to a file or a database.
-    console.log('Saving content:', content);
-  };
+    const handleChange = useCallback(() => {
+        console.log(onChangeRef.current, isEditorReady)
+        if (isEditorReady && onChangeRef.current) {
+            const newContent = editorRef.current.textContent;
+            valueRef.current = newContent; // Update the stored value
+            onChangeRef.current(newContent);
+        }
+    }, [isEditorReady])
 
-  const handleContentChange = () => {
-    const newContent = contentEditableRef.current.innerHTML;
-    if (content !== newContent) {
-      undoStackRef.current.push(content);
-      redoStackRef.current = [];
-      setContent(newContent);
-    }
-  };
+    const createEditor = useCallback(() => {
+        if (!containerRef.current) return;
+        setIsEditorMounting(true);
 
-  return (
-    <div className={styles.textEditor}>
-      <div className={styles.toolbar}>
-        <button onClick={handleUndo} className={styles.toolbarButton}>
-          Undo
-        </button>
-        <button onClick={handleRedo} className={styles.toolbarButton}>
-          Redo
-        </button>
-        <button onClick={handleSave} className={styles.toolbarButton}>
-          Save
-        </button>
-      </div>
-      <div
-        ref={contentEditableRef}
-        className={styles.contentEditable}
-        contentEditable
-        onInput={handleContentChange}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
-    </div>
-  );
+        const tempDiv = contentEditableDiv(value || defaultValue || '');
+        containerRef.current.appendChild(tempDiv);
+        editorRef.current = tempDiv;
+        setIsEditorMounting(false)
+        setIsEditorReady(true);
+        if (onMountRef.current) {
+            onMountRef.current()
+        }
+    }, [defaultValue, value])
+
+    useEffect(() => {
+        // Attach input event listener when the component is mounted
+        if (isEditorReady && !readOnly) {
+            editorRef.current.addEventListener('input', handleChange);
+        }
+
+        // Clean up the event listener when the component is unmounted
+        return () => {
+            if (isEditorReady && !readOnly) {
+                editorRef.current.removeEventListener('input', handleChange);
+            }
+        };
+    }, [isEditorReady, handleChange, readOnly]);
+
+    useEffect(() => {
+        !isEditorReady && !isEditorMounting && createEditor();
+    }, [isEditorReady, isEditorMounting, createEditor]);
+
+
+    useEffect(() => {
+        if (!isEditorReady) return;
+        if (valueRef.current !== value) {
+            valueRef.current = value;
+            editorRef.current.textContent = value;
+        }
+    }, [value, isEditorReady])
+
+    useEffect(() => {
+        if (!isEditorReady) return;
+        if (languageRef.current !== language) {
+            languageRef.current = language;
+        }
+    }, [language, isEditorReady])
+
+    useEffect(() => {
+        if (!isEditorReady) return;
+        if (themeRef.current !== theme) {
+            themeRef.current = theme;
+        }
+    }, [theme, isEditorReady])
+
+    useEffect(() => {
+        if (!isEditorReady) return;
+        if (lineRef.current !== line) {
+            lineRef.current = line;
+        }
+    }, [line, isEditorReady])
+
+    useEffect(() => {
+        if (!isEditorReady) return;
+        if (readOnly) {
+            editorRef.current.setAttribute('contenteditable', 'false');
+        } else {
+            editorRef.current.setAttribute('contenteditable', 'true');
+        }
+    }, [readOnly, isEditorReady])
+    
+    return (
+        <section style={{...styles.wrapper, width, height}}>
+            <div
+                className="border-1 border-gray-800 rounded-b-lg p-2 outline-none focus:ring-2 focus:ring-gray-400 w-full flex flex-row">
+                {!isEditorReady && loading}
+                <div
+                    ref={containerRef}
+                    className={className}
+                    style={{...styles.fullWidth, ...(!isEditorReady && styles.hide)}}
+                />
+            </div>
+        </section>
+    );
 }
