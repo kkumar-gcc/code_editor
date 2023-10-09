@@ -1,11 +1,21 @@
-/* Editor.css */
-.line-gutter {
-  /* Your gutter styling goes here */
-  background-color: #f0f0f0;
-  border-right: 1px solid #ccc;
-  padding: 4px;
-  text-align: right;
-  color: #777;
+.gutter {
+  position: relative;
+  display: flex;
+  width: 72px;
+  min-width: 72px;
+  flex-direction: column;
   user-select: none;
+  align-items: flex-end;
 }
 
+.line-number{
+    position: relative;
+    color: #999;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: right;
+    pointer-events: none;
+    white-space:pre;
+    word-wrap: normal;
+    padding: 0 16px;
+}

@@ -4,7 +4,8 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import EditorProps from './EditorProps';
 import styles from "./styles";
 import "./Editor.css";
-import contentEditableDiv from "../utils/contentEditableUtils";
+import contentEditableDiv from "../utils/contentEditableDiv";
+import gutterDiv from "../utils/gutterDiv";
 
 export default function Editor({
                                    defaultValue,
@@ -22,8 +23,7 @@ export default function Editor({
                                    onSave,
                                    onFind,
                                    onReplace,
-                                   onMount,
-                                   onValidate
+                                   onMount
                                }: EditorProps
 ) {
     const [isEditorReady, setIsEditorReady] = useState(false);
@@ -35,48 +35,70 @@ export default function Editor({
     const onSaveRef = useRef(onSave);
     const onFindRef = useRef(onFind);
     const onReplaceRef = useRef(onReplace);
-    const onValidateRef = useRef(onValidate);
     const valueRef = useRef(value);
     const languageRef = useRef(language);
     const themeRef = useRef(theme);
-    const lineRef = useRef(line);
+    // const lineRef = useRef(line);
     const gutterRef = useRef<any>(null)
-    
+    const lineNumbersRef = useRef<number[]>([]);
+
+
     useEffect(() => {
         onMountRef.current = onMount;
         onChangeRef.current = onChange;
         onSaveRef.current = onSave;
         onFindRef.current = onFind;
         onReplaceRef.current = onReplace;
-        onValidateRef.current = onValidate;
-    }, [onMount, onChange, onSave, onFind, onReplace, onValidate]);
+    }, [onMount, onChange, onSave, onFind, onReplace]);
 
     useEffect(() => {
         createEditor();
     }, []);
 
+    // Updated updateLineNumbers function
+    const updateLineNumbers = useCallback(() => {
+        if (!editorRef.current || !gutterRef.current || !valueRef.current) return;
+
+        const lines = valueRef.current.split('\n');
+        lineNumbersRef.current = Array.from({length: lines.length}, (_, index) => index + 1);
+
+        // Render line numbers in the gutter using <div> elements with a class
+        gutterRef.current.innerHTML = lineNumbersRef.current.map((lineNumber) => {
+            return `<div class="line-number">${lineNumber}</div>`;
+        }).join('');
+    }, []);
+
     const handleChange = useCallback(() => {
-        console.log(onChangeRef.current, isEditorReady)
         if (isEditorReady && onChangeRef.current) {
             const newContent = editorRef.current.innerText;
-            valueRef.current = newContent; // Update the stored value
+            valueRef.current = newContent;
             onChangeRef.current(newContent);
         }
-    }, [isEditorReady])
+        updateLineNumbers();
+    }, [isEditorReady, updateLineNumbers])
 
     const createEditor = useCallback(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || !gutterRef.current) return;
         setIsEditorMounting(true);
 
         const tempDiv = contentEditableDiv(value || defaultValue || '');
         containerRef.current.appendChild(tempDiv);
         editorRef.current = tempDiv;
+
+        if (readOnly) {
+            editorRef.current.setAttribute('contenteditable', 'false');
+        }
+
+        // Add gutter and initialize line numbers
+        gutterRef.current.appendChild(gutterDiv());
+        updateLineNumbers();
+
         setIsEditorMounting(false)
         setIsEditorReady(true);
         if (onMountRef.current) {
             onMountRef.current()
         }
-    }, [defaultValue, value])
+    }, [defaultValue, value, updateLineNumbers, readOnly]);
 
     useEffect(() => {
         // Attach input event listener when the component is mounted
@@ -119,12 +141,12 @@ export default function Editor({
         }
     }, [theme, isEditorReady])
 
-    useEffect(() => {
-        if (!isEditorReady) return;
-        if (lineRef.current !== line) {
-            lineRef.current = line;
-        }
-    }, [line, isEditorReady])
+    // useEffect(() => {
+    //     if (!isEditorReady) return;
+    //     if (lineRef.current !== line) {
+    //         lineRef.current = line;
+    //     }
+    // }, [line, isEditorReady])
 
     useEffect(() => {
         if (!isEditorReady) return;
@@ -134,16 +156,21 @@ export default function Editor({
             editorRef.current.setAttribute('contenteditable', 'true');
         }
     }, [readOnly, isEditorReady])
-    
+
     return (
-        <section style={{...styles.wrapper, width, height}}>
+        <section className={"border-1 border-gray-400 rounded-b-lg "} style={{...styles.wrapper, width, height}}>
             <div
-                className="border-1 border-gray-800 rounded-b-lg p-2 outline-none focus:ring-2 focus:ring-gray-400 w-full flex flex-row">
+                className="flex flex-row overflow-x-scroll w-full">
                 {!isEditorReady && loading}
+                <div
+                    ref={gutterRef}
+                    className={"gutter"}
+                    style={{...(!isEditorReady && styles.hide)}}
+                />
                 <div
                     ref={containerRef}
                     className={className}
-                    style={{...styles.fullWidth, ...(!isEditorReady && styles.hide)}}
+                    style={{...styles.container, ...styles.fullWidth, ...(!isEditorReady && styles.hide)}}
                 />
             </div>
         </section>

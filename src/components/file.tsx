@@ -54,7 +54,7 @@ export default function File({file}: { file: any }) {
     return <div className={"py-6"}>
         <Errors errors={errors} />
         <div
-            className={"mt-2 flex flex-row bg-gray-50 border-1 rounded-t-lg mt-4 p-2 border-gray-800 border-b-0 items-center"}>
+            className={"flex flex-row bg-gray-50 border-1 rounded-t-lg mt-4 p-2 border-gray-400 border-b-0 items-center sticky"}>
             <div>
                 <p>{file.name}</p>
             </div>
