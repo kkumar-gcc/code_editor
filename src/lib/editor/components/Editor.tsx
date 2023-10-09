@@ -6,6 +6,7 @@ import styles from "./styles";
 import "./Editor.css";
 import contentEditableDiv from "../utils/contentEditableDiv";
 import gutterDiv from "../utils/gutterDiv";
+import Loading from "../components/Loading";
 
 export default function Editor({
                                    defaultValue,
@@ -161,7 +162,7 @@ export default function Editor({
         <section className={"border-1 border-gray-400 rounded-b-lg "} style={{...styles.wrapper, width, height}}>
             <div
                 className="flex flex-row overflow-x-scroll w-full">
-                {!isEditorReady && loading}
+                {!isEditorReady && <Loading>{loading}</Loading> }
                 <div
                     ref={gutterRef}
                     className={"gutter"}
