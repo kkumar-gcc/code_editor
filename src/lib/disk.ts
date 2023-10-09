@@ -41,9 +41,12 @@ class DiskManager {
         return this.client.removeObjects(this.bucket, files);
     }
 
-    public async put(file: string, content: string | Buffer){
+    public async put(file: string, content: string | Buffer, mimeType?: string) {
         try {
-            return await this.client.putObject(this.bucket, file, content);
+            const metaData = {
+                'Content-Type': mimeType,
+            };
+            return await this.client.putObject(this.bucket, file, content, metaData);
         } catch (err) {
             console.error('Error putting file to Minio:', err);
             throw err;

@@ -6,7 +6,6 @@ interface EditorProps {
     value?: string;
     language?: string;
     theme?: string;
-    line?: number;
     loading?: ReactNode;
     width?: string | number;
     height?: string | number;

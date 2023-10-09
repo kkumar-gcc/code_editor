@@ -6,6 +6,8 @@ import {useRouter} from "next/navigation";
 import {useCustomForm} from "@/hooks/useCustomForm";
 import {CustomError} from "@/types/customError";
 import Errors from "@/components/errors";
+import {Download} from "@/components/geist-ui/icons";
+import Renderer from "@/lib/file/renderer";
 
 export default function File({file}: { file: any }) {
     const [readOnly, setReadOnly] = React.useState(true);
@@ -51,15 +53,28 @@ export default function File({file}: { file: any }) {
         resetForm()
     }, [file]);
 
+    function handleDownload(file: any) {
+        const link = document.createElement('a');
+        link.download = file.name;
+
+        link.href = file.url;
+
+        link.click();
+    }
+
+    const fileRenderer = new Renderer(file);
+
     return <div className={"py-6"}>
-        <Errors errors={errors} />
+        <Errors errors={errors}/>
         <div
             className={"flex flex-row bg-gray-50 border-1 rounded-t-lg mt-4 p-2 border-gray-400 border-b-0 items-center sticky"}>
             <div>
                 <p>{file.name}</p>
             </div>
             <div className={"flex-1 flex justify-end"}>
-                {readOnly ?
+                <Button className={"h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2"}
+                        onPress={() => handleDownload(file)}><Download size={"lg"}/></Button>
+                {fileRenderer.determineType() === "text" ? (readOnly ?
                     <Button className={"h-8 bg-white border min-w-unit-12 shadow rounded-lg"}
                             onPress={() => setReadOnly(false)}>edit</Button>
                     :
@@ -69,10 +84,14 @@ export default function File({file}: { file: any }) {
                                 disabled={isDisabled} isLoading={isSubmitting}>save</Button>
                         <Button className={"h-8 bg-white border min-w-unit-12 shadow rounded-lg"}
                                 onPress={() => setReadOnly(true)}>cancel</Button>
-                    </form>
+                    </form>)
+                    : null
                 }
             </div>
         </div>
-        <Editor value={file.content} className={"rounded-b-lg"} onChange={onChange} readOnly={readOnly}/>
+        {fileRenderer.determineType() !== "text" ?
+            fileRenderer.render()
+            : <Editor value={file.content} className={"rounded-b-lg"} onChange={onChange} readOnly={readOnly}/>
+        }
     </div>
 }
