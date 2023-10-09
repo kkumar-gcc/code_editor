@@ -12,9 +12,8 @@ export default function contentEditableDiv(value: string) {
     contentEditableDiv.spellcheck = false;
     contentEditableDiv.autocapitalize = 'off';
     contentEditableDiv.innerText = value;
-    contentEditableDiv.className = "outline-none focus:ring-2 focus:ring-gray-400 code-editor";
-    contentEditableDiv.style.overflowX = 'scroll';
-    contentEditableDiv.style.whiteSpace = 'pre-wrap';
+    contentEditableDiv.className = "outline-none focus:ring-2 focus:ring-gray-400 code-editor w-full";
+    contentEditableDiv.style.whiteSpace = 'pre';
     contentEditableDiv.style.display = "inline-block";
 
     return contentEditableDiv

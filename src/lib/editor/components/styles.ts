@@ -5,13 +5,19 @@ const styles: Record<string, CSSProperties>={
         display: 'flex',
         position: 'relative',
         textAlign: 'initial',
+        padding: '8px 0px',
     },
     fullWidth:{
-        width: '100%',
+        width: '100%', 
+        marginLeft: '10px',
     },
     hide:{
         display: 'none',
     },
+    container:{
+        fontSize: '12px',
+        lineHeight: '20px',
+    }
 };
 
 export default  styles;

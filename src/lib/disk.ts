@@ -1,6 +1,7 @@
 import {Client} from "minio";
 
 // We are using Minio for disk
+// Contributed by: https://github.com/saha-alpha9
 class DiskManager {
     private readonly client: Client;
     private bucket: string;
