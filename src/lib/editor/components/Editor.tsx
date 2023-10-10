@@ -6,6 +6,7 @@ import styles from "./styles";
 import "./Editor.css";
 import contentEditableDiv from "../utils/contentEditableDiv";
 import gutterDiv from "../utils/gutterDiv";
+import Loading from "../components/Loading";
 
 export default function Editor({
                                    defaultValue,
@@ -13,7 +14,6 @@ export default function Editor({
                                    value,
                                    language,
                                    theme,
-                                   line,
                                    loading = "Loading...",
                                    width,
                                    height,
@@ -38,7 +38,6 @@ export default function Editor({
     const valueRef = useRef(value);
     const languageRef = useRef(language);
     const themeRef = useRef(theme);
-    // const lineRef = useRef(line);
     const gutterRef = useRef<any>(null)
     const lineNumbersRef = useRef<number[]>([]);
 
@@ -141,13 +140,6 @@ export default function Editor({
         }
     }, [theme, isEditorReady])
 
-    // useEffect(() => {
-    //     if (!isEditorReady) return;
-    //     if (lineRef.current !== line) {
-    //         lineRef.current = line;
-    //     }
-    // }, [line, isEditorReady])
-
     useEffect(() => {
         if (!isEditorReady) return;
         if (readOnly) {
@@ -159,9 +151,8 @@ export default function Editor({
 
     return (
         <section className={"border-1 border-gray-400 rounded-b-lg "} style={{...styles.wrapper, width, height}}>
-            <div
-                className="flex flex-row overflow-x-scroll w-full">
-                {!isEditorReady && loading}
+            <div className="flex flex-row overflow-x-scroll w-full">
+                {!isEditorReady && <Loading>{loading}</Loading> }
                 <div
                     ref={gutterRef}
                     className={"gutter"}

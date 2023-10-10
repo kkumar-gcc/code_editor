@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string[
         const generatedName = `${currentTime}_${userId}_${name}`;
 
         // Upload the file to disk storage
-        const diskFile = await disk.put(generatedName, buffer);
+        const diskFile = await disk.put(generatedName, buffer, file.type);
 
         const newFile = await prisma.file.create({
             data: {
@@ -122,7 +122,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             return NextResponse.json({ message: "File not found!" }, { status: 404 });
         }
 
-        await disk.put(file.path, Buffer.from(content));
+        await disk.put(file.path, Buffer.from(content), file.mimeType);
 
         return NextResponse.json(
             {
