@@ -5,15 +5,19 @@ import {
     Dropdown,
     DropdownItem,
     DropdownMenu,
+    DropdownTrigger,
     Table,
-    DropdownTrigger, TableBody, TableCell,
+    TableBody,
+    TableCell,
     TableColumn,
-    TableHeader, TableRow, useDisclosure
+    TableHeader,
+    TableRow,
+    useDisclosure
 } from "@nextui-org/react";
 import React from "react";
-import { DateTime } from "luxon";
+import {DateTime} from "luxon";
 import Link from "next/link";
-import { File as FileIcon, Folder as FolderIcon, MoreHorizontal, Plus, Trash2, Edit } from '@/components/geist-ui/icons';
+import {Edit, File as FileIcon, Folder as FolderIcon, MoreHorizontal, Plus, Trash2} from '@/components/geist-ui/icons';
 import NewFolder from "@/components/folders/new";
 import NewFile from "@/components/files/new";
 import EditFolder from "@/components/folders/edit";
@@ -41,7 +45,7 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
         editFile.onOpen()
     }
 
-    async function handleDeleteFolder (folder: any){
+    async function handleDeleteFolder(folder: any) {
         setFolder(folder)
         deleteFolder.onOpen()
     }
@@ -49,6 +53,16 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
     function handleDeleteFile(file: any) {
         setFile(file);
         deleteFile.onOpen()
+    }
+
+    function formatSize(bytes: number): string {
+        if (bytes === 0) return '0 Bytes';
+
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     return <div>
@@ -59,7 +73,7 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
                     <DropdownTrigger>
                         <Button className={"bg-white border shadow rounded-lg"} startContent={<Plus/>}>Add New</Button>
                     </DropdownTrigger>
-                    <DropdownMenu aria-label="Example with disabled actions" variant="faded" disabledKeys={["edit", "delete"]}>
+                    <DropdownMenu aria-label="Example with disabled actions" variant="faded">
                         <DropdownItem key="new_folder" startContent={<FolderIcon size={18}/> } onPress={newFolder.onOpen} >
                             New Folder
                         </DropdownItem>
@@ -84,7 +98,7 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
                         <TableRow key={`folder-${index}`}>
                             <TableCell><FolderIcon/></TableCell>
                             <TableCell><Link href={`/folders/${folder.id}`}>{folder.name}</Link></TableCell>
-                            <TableCell>{DateTime.local(folder.updatedAt).toLocaleString(DateTime.DATE_FULL)}</TableCell>
+                            <TableCell>{DateTime.fromJSDate(folder.updatedAt).toFormat('DDD')}</TableCell>
                             <TableCell>{folder.size}</TableCell>
                             <TableCell>
                             <Dropdown>
@@ -105,18 +119,22 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
                         <TableRow key={`file-${index}`}>
                             <TableCell><FileIcon/></TableCell>
                             <TableCell><Link href={`/files/${file.id}`}>{file.name}</Link></TableCell>
-                            <TableCell>{DateTime.local(file.updatedAt).toLocaleString(DateTime.DATE_FULL)}</TableCell>
-                            <TableCell>{file.size}</TableCell>
+                            <TableCell>{DateTime.fromJSDate(file.updatedAt).toLocaleString(DateTime.DATE_FULL)}</TableCell>
+                            <TableCell>{formatSize(file.size)}</TableCell>
                             <TableCell>
-                            <Dropdown>
-                                <DropdownTrigger>
-                                    <Button className={"bg-white border-none shadow-none rounded-lg"} startContent={<MoreHorizontal/>}></Button>
-                                </DropdownTrigger>
-                                <DropdownMenu aria-label="Example with disabled actions" variant="faded" disabledKeys={["edit", "delete"]}>
-                                    <DropdownItem key="edit_file" startContent={<Edit size={18}/> } onPress={()=>handleEditFile(file)} >
-                                        Edit file
-                                    </DropdownItem>
-                                    <DropdownItem className={"text-red-600"} key="delete_file" startContent={<Trash2 size={18}/>} onPress={()=>handleDeleteFile(file)}>Delete file</DropdownItem>
+                                <Dropdown>
+                                    <DropdownTrigger>
+                                        <Button className={"bg-white border-none shadow-none rounded-lg"}
+                                                startContent={<MoreHorizontal/>}></Button>
+                                    </DropdownTrigger>
+                                    <DropdownMenu aria-label="Example with disabled actions" variant="faded">
+                                        <DropdownItem key="edit_file" startContent={<Edit size={18}/>}
+                                                      onPress={() => handleEditFile(file)}>
+                                            Edit file
+                                        </DropdownItem>
+                                        <DropdownItem className={"text-red-600"} key="delete_file"
+                                                      startContent={<Trash2 size={18}/>}
+                                                      onPress={() => handleDeleteFile(file)}>Delete file</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown></TableCell>
                         </TableRow>

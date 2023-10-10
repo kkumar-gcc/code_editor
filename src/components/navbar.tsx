@@ -1,5 +1,5 @@
 "use client"
-import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Avatar, Spinner} from "@nextui-org/react";
+import {Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Spinner} from "@nextui-org/react";
 import {signOut, useSession} from "next-auth/react";
 import React from "react";
 
@@ -10,18 +10,26 @@ export default function Navbar() {
         <nav className="bg-skin-base border-b border-gray-100 z-10 border-t w-full py-4 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-row items-center">
                 <div className="mr-4">
-                    <a href="/" className="navbar-item">
-                        CODE IDE
+                    <a href="/folders" className="navbar-item">
+                        <b>
+                            <i style={{letterSpacing: '0.6px'}}>
+                                <span className="text-indigo-500">C</span>
+                                <span className="text-pink-500">O</span>
+                                <span className="text-purple-500">D</span>
+                                <span className="text-teal-500">E</span>
+                                <span className="ml-1.5">IDE</span>
+                            </i>
+                        </b>
                     </a>
                 </div>
                 <div className="flex-1 flex justify-end">
-                    {status === "loading"?
+                    {status === "loading" ?
                         <Spinner color="default" labelColor="foreground"/> :
-                        <Dropdown >
-                        <DropdownTrigger>
-                            {data?.user?.image ? (
-                                <Avatar
-                                    size={"md"}
+                        <Dropdown>
+                            <DropdownTrigger>
+                                {data?.user?.image ? (
+                                    <Avatar
+                                        size={"md"}
                                     isBordered
                                     radius="full"
                                     src={data.user.image}
