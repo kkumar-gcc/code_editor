@@ -6,22 +6,46 @@ import RenderApplication from "@/lib/file/widgets/application";
 
 class Renderer {
     private readonly file: any;
+    private editable = ["application/json", "application/xml", "application/javascript", "application/xhtml+xml", "application/sql", "application/yaml", "application/x-yaml", "application/csv", "application/x-csv", "application/x-sh", "application/xml-dtd", "application/x-httpd-php", "application/x-latex", "application/x-python", "application/x-perl", "application/postscript", "application/x-tex", "application/ld+json", "application/rss+xml", "application/soap+xml"];
+    // we add more types to support preview
+    private embeddableApplications = ["application/pdf"]
 
     constructor(file: any) {
         this.file = file;
     }
 
+    private isApplication(mimeType: string) {
+        return this.embeddableApplications.includes(mimeType);
+    }
+
+    private isAudio(mimeType: string) {
+        return mimeType.startsWith("audio");
+    }
+
+    private isImage(mimeType: string) {
+        return mimeType.startsWith("image");
+    }
+
+    private isText(mimeType: string) {
+        return this.editable.includes(mimeType) || mimeType.startsWith("text");
+    }
+
+    private isVideo(mimeType: string) {
+        return mimeType.startsWith("video");
+    }
+
+
     public determineType() {
         const type = this.file.mimeType;
-        if (type.startsWith("image")) {
+        if (this.isImage(type)) {
             return "image";
-        } else if (type.startsWith("video")) {
+        } else if (this.isVideo(type)) {
             return "video";
-        } else if (type.startsWith("audio")) {
+        } else if (this.isAudio(type)) {
             return "audio";
-        } else if (type.startsWith("text")) {
+        } else if (this.isText(type)) {
             return "text";
-        } else if (type.startsWith("application")) {
+        } else if (this.isApplication(type)) {
             return "application";
         } else {
             return "unknown";

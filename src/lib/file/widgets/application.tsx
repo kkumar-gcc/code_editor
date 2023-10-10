@@ -3,7 +3,7 @@ export default function RenderApplication({file}: { file: any }) {
         <embed
             src={file.url}
             type={file.mimeType}
-            className="w-full"
+            className="w-full min-h-max"
             title={file.name}
         />
     </div>
