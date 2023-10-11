@@ -1,4 +1,4 @@
-**ADDENDUM 2**
+![image](https://github.com/kkumar-gcc/CS455/assets/143108119/d27e2615-ba72-4ee7-944c-2b6c81cb552c)**ADDENDUM 2**
 
 # Text Editor Installation Instructions
 
@@ -10,7 +10,7 @@ Make sure you have the following software installed on your system:
 
 - [Prisma DB](https://prisma.io)
 - [Minio](https://min.io) account
-- [Node.js](https://nodejs.org)
+- [Next.js](https://nodejs.org)
 - [GitHub](https://github.com) account
 - Any code editor (Preferably [Visual Studio Code](https://code.visualstudio.com))
 
@@ -18,18 +18,23 @@ Make sure you have the following software installed on your system:
 
 Clone the repository to your local environment using the following command in the terminal or command prompt:
 
+```properties
 git clone https://github.com/kkumar-gcc/CS455
+```
 
 ### 3. Migrate the Database
 
-
+```properties
 npx prisma migrate dev
+```
 
 
 ### 4. Install Dependencies
 Open the project in your preferred code editor and run the following command in the terminal:
 
+```properties
 npm install
+```
 
 ### 5. Set Environment Variables
 
@@ -49,7 +54,9 @@ Note: You can copy the .env.example file to .env and replace the placeholder val
 
 Start the project by running the following command:
 
+```properties
 npm run dev
+```
 
 The application will be accessible at http://localhost:3000/folders
 
