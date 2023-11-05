@@ -14,12 +14,12 @@ export default async function HomeLayout({children}: {
 }) {
     return (
         <html lang="en">
-            <body className={`flex items-center justify-center flex-col`}>
-            <Providers>
-                <Navbar />
-                {children}
-            </Providers>
-            </body>
+        <body className={`flex items-center justify-center flex-col`}>
+        <Providers>
+            <Navbar/>
+            {children}
+        </Providers>
+        </body>
         </html>
     );
 }
