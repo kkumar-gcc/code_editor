@@ -3,6 +3,7 @@ import RenderVideo from "@/lib/file/widgets/video";
 import RenderAudio from "@/lib/file/widgets/audio";
 import RenderUnknown from "@/lib/file/widgets/unknown";
 import RenderApplication from "@/lib/file/widgets/application";
+import {languages} from "@/lib/file/languages";
 
 class Renderer {
     private readonly file: any;
@@ -53,6 +54,9 @@ class Renderer {
     }
 
     public determineLanguage() {
+        const ext = this.file.name.split('.').pop();
+        const language = languages[ext];
+        return language || ext || "text";
     }
 
     public render() {

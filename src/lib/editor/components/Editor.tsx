@@ -2,11 +2,14 @@
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import EditorProps from './EditorProps';
-import styles from "./styles";
-import "./Editor.css";
 import contentEditableDiv from "../utils/contentEditableDiv";
 import gutterDiv from "../utils/gutterDiv";
 import Loading from "../components/Loading";
+import 'prismjs/themes/prism.css';
+import styles from "./styles";
+import "./Editor.css";
+import {Button, Input} from "@nextui-org/react";
+import {Search as SearchIcon} from "@/components/geist-ui/icons";
 
 export default function Editor({
                                    defaultValue,
@@ -27,7 +30,15 @@ export default function Editor({
                                }: EditorProps
 ) {
     const [isEditorReady, setIsEditorReady] = useState(false);
+    const [showFind, setShowFind] = useState(false);
+    const [showReplace, setShowReplace] = useState(false);
     const [isEditorMounting, setIsEditorMounting] = useState(true);
+    const [findValue, setFindValue] = useState('');
+    const [replaceValue, setReplaceValue] = useState('');
+    const [_, setFoundCount] = useState(0);
+    const [isCaseSensitive, setIsCaseSensitive] = useState(false);
+    const [isWholeWords, setIsWholeWords] = useState(false);
+    const [ctrlKeyPressed, setCtrlKeyPressed] = useState(false);
     const editorRef = useRef<any>(null);
     const containerRef = useRef<any>(null);
     const onMountRef = useRef(onMount);
@@ -36,11 +47,66 @@ export default function Editor({
     const onFindRef = useRef(onFind);
     const onReplaceRef = useRef(onReplace);
     const valueRef = useRef(value);
-    const languageRef = useRef(language);
     const themeRef = useRef(theme);
     const gutterRef = useRef<any>(null)
     const lineNumbersRef = useRef<number[]>([]);
 
+    const resetHighlight = useCallback(() => {
+        const editor = editorRef.current;
+
+        if (editor) {
+            const highlightedSpans = editor.querySelectorAll('span.highlighted');
+
+            highlightedSpans.forEach((span: any) => {
+                const textNode = document.createTextNode(span.textContent);
+                span.parentNode.replaceChild(textNode, span);
+            });
+        }
+
+    }, []);
+
+    const handleFindReplace = useCallback((replace: boolean = false, replaceAll: boolean = true) => {
+        if (!editorRef.current) return;
+
+        const editorContent = editorRef.current.textContent;
+        let findNewValue = findValue;
+        if (findNewValue) {
+            console.log(findNewValue)
+            let flags = 'g';
+            if (isCaseSensitive) flags = 'g';
+            if (isWholeWords) findNewValue = `\\b${findNewValue}\\b`;
+
+            const regex = new RegExp(findNewValue, flags);
+            const matches = editorContent.match(regex);
+            console.log(matches, regex, findNewValue, flags);
+            if (matches) {
+                setFoundCount(matches.length);
+
+                if (replace && !readOnly) {
+                    editorRef.current.textContent = editorContent.replace(replaceAll ? regex : new RegExp(findNewValue), replaceValue);
+                } else {
+                    editorRef.current.innerHTML = editorContent.replace(
+                        regex,
+                        (match: string) => `<span class="highlighted">${match}</span>`
+                    );
+                }
+            } else {
+                console.log("insde not no magtch", findValue, findNewValue)
+                resetHighlight();
+                setFoundCount(0);
+            }
+        } else {
+            console.log("insde not findValue", findValue, findNewValue)
+            resetHighlight();
+            setFoundCount(0);
+        }
+    }, [findValue, replaceValue, isCaseSensitive, isWholeWords, resetHighlight, readOnly]);
+
+    const toggleFindReplace = useCallback(() => {
+        // setShowFind(!showFind);
+        setShowReplace(!showReplace);
+        resetHighlight();
+    }, [showReplace, resetHighlight]);
 
     useEffect(() => {
         onMountRef.current = onMount;
@@ -67,20 +133,11 @@ export default function Editor({
         }).join('');
     }, []);
 
-    const handleChange = useCallback(() => {
-        if (isEditorReady && onChangeRef.current) {
-            const newContent = editorRef.current.innerText;
-            valueRef.current = newContent;
-            onChangeRef.current(newContent);
-        }
-        updateLineNumbers();
-    }, [isEditorReady, updateLineNumbers])
-
     const createEditor = useCallback(() => {
         if (!containerRef.current || !gutterRef.current) return;
         setIsEditorMounting(true);
 
-        const tempDiv = contentEditableDiv(value || defaultValue || '');
+        const tempDiv = contentEditableDiv(value || defaultValue || '', language || defaultLanguage || 'text');
         containerRef.current.appendChild(tempDiv);
         editorRef.current = tempDiv;
 
@@ -97,7 +154,19 @@ export default function Editor({
         if (onMountRef.current) {
             onMountRef.current()
         }
-    }, [defaultValue, value, updateLineNumbers, readOnly]);
+    }, [value, defaultValue, language, defaultLanguage, readOnly, updateLineNumbers]);
+
+    const handleChange = useCallback(() => {
+        if (isEditorReady && onChangeRef.current) {
+            const newContent = editorRef.current.innerText;
+            valueRef.current = newContent;
+            onChangeRef.current(newContent);
+
+            // Prism.highlightElement(containerRef.current.firstChild)
+        }
+
+        updateLineNumbers();
+    }, [isEditorReady, updateLineNumbers])
 
     useEffect(() => {
         // Attach input event listener when the component is mounted
@@ -117,7 +186,6 @@ export default function Editor({
         !isEditorReady && !isEditorMounting && createEditor();
     }, [isEditorReady, isEditorMounting, createEditor]);
 
-
     useEffect(() => {
         if (!isEditorReady) return;
         if (valueRef.current !== value) {
@@ -125,13 +193,6 @@ export default function Editor({
             editorRef.current.textContent = value;
         }
     }, [value, isEditorReady])
-
-    useEffect(() => {
-        if (!isEditorReady) return;
-        if (languageRef.current !== language) {
-            languageRef.current = language;
-        }
-    }, [language, isEditorReady])
 
     useEffect(() => {
         if (!isEditorReady) return;
@@ -149,21 +210,132 @@ export default function Editor({
         }
     }, [readOnly, isEditorReady])
 
+    useEffect(() => {
+        if (isEditorReady) {
+            if (findValue != '') {
+                handleFindReplace();
+            } else {
+                resetHighlight();
+            }
+        }
+    }, [isEditorReady, findValue, resetHighlight, handleFindReplace]);
+
+    useEffect(() => {
+        function handleKeyDown(e: any) {
+            if (e.key === 'Control') {
+                setCtrlKeyPressed(true);
+            }
+            if (e.key === 'f' && ctrlKeyPressed) {
+                setShowFind(true);
+            }
+        }
+
+        function handleKeyUp(e: any) {
+            if (e.key === 'Control') {
+                e.preventDefault();
+                setCtrlKeyPressed(false);
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [ctrlKeyPressed]);
+
+
     return (
-        <section className={"border-1 border-gray-400 rounded-b-lg "} style={{...styles.wrapper, width, height}}>
-            <div className="flex flex-row overflow-x-scroll w-full">
-                {!isEditorReady && <Loading>{loading}</Loading> }
+        <>
+            {showFind ? (
                 <div
-                    ref={gutterRef}
-                    className={"gutter"}
-                    style={{...(!isEditorReady && styles.hide)}}
-                />
-                <div
-                    ref={containerRef}
-                    className={className}
+                    className={'sticky top-0 left-0 w-full border z-10 border-gray-400 shadow-sm bg-white flex flex-row'}>
+                    <div className={'p-4 flex items-center justify-center'}>
+                        <Button className={'h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
+                                onClick={toggleFindReplace}>
+                            <SearchIcon size={'lg'}/>
+                        </Button>
+                    </div>
+                    <div className={'flex-1 p-4 border-r-1'}>
+                        <Input
+                            autoFocus
+                            placeholder="Search"
+                            variant="bordered"
+                            name="find"
+                            value={findValue}
+                            onChange={(e) => {
+                                setFindValue(e.target.value);
+                            }}
+                        />
+                        {!readOnly && showReplace ? (
+                            <div>
+                                <Input
+                                    className={'mt-2'}
+                                    placeholder="Replace"
+                                    variant="bordered"
+                                    name="replace"
+                                    value={replaceValue}
+                                    onChange={(e) => setReplaceValue(e.target.value)}
+                                />
+                                <div className={'mt-2'}>
+                                    <Button
+                                        className={'h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
+                                        onClick={() => handleFindReplace(true, false)}
+                                    >
+                                        Replace
+                                    </Button>
+                                    <Button
+                                        className={'h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
+                                        onClick={() => handleFindReplace(true)}
+                                    >
+                                        Replace All
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
+                    <div className={'p-4 flex items-center justify-center'}>
+                        <Button
+                            className={`h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2 ${isCaseSensitive ? "border-gray-400" : ""}`}
+                            onClick={() => setIsCaseSensitive(!isCaseSensitive)}>
+                            Cc
+                        </Button>
+
+                        <Button
+                            className={`h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2 ${isWholeWords ? "border-1 border-gray-400" : "bg-white"}`}
+                            onClick={() => {
+                                setIsWholeWords(!isWholeWords);
+                            }}>
+                            W
+                        </Button>
+                        <Button
+                            className={`h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2 ${isWholeWords ? "border-1 border-gray-400" : "bg-white"}`}
+                            onClick={() => {
+                                setShowFind(false);
+                            }}>
+                            Close
+                        </Button>
+                    </div>
+                </div>
+            ) : null}
+            <section className={"border-1 border-gray-400 rounded-b-lg relative"}
+                     style={{...styles.wrapper, width, height}}>
+                <div className="flex flex-row overflow-x-scroll w-full">
+                    {!isEditorReady && <Loading>{loading}</Loading>}
+                    <div
+                        ref={gutterRef}
+                        className={"gutter"}
+                        style={{...(!isEditorReady && styles.hide)}}
+                    />
+                    <div
+                        ref={containerRef}
+                        className={className}
                     style={{...styles.container, ...styles.fullWidth, ...(!isEditorReady && styles.hide)}}
                 />
             </div>
         </section>
+        </>
     );
 }

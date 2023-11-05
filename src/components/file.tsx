@@ -6,11 +6,12 @@ import {useRouter} from "next/navigation";
 import {useCustomForm} from "@/hooks/useCustomForm";
 import {CustomError} from "@/types/customError";
 import Errors from "@/components/errors";
-import {Download} from "@/components/geist-ui/icons";
+import {Download, Copy, Check} from "@/components/geist-ui/icons";
 import Renderer from "@/lib/file/renderer";
 
 export default function File({file}: { file: any }) {
     const [readOnly, setReadOnly] = React.useState(true);
+    const [isCopied, setIsCopied] = React.useState(false);
     const router = useRouter();
     const {state, setState, errors, isSubmitting, isDisabled, setIsDisabled, handleSubmit, resetForm} = useCustomForm(
         {
@@ -64,6 +65,21 @@ export default function File({file}: { file: any }) {
 
     const fileRenderer = new Renderer(file);
 
+    function handleCopyToClipboard() {
+        navigator.clipboard.writeText(state.content)
+            .then(() => {
+                setIsCopied(true);
+
+                // Reset isCopied state to false after 5 seconds
+                setTimeout(() => {
+                    setIsCopied(false);
+                }, 2000);
+            })
+            .catch((error) => {
+                console.error("Error copying to clipboard:", error);
+            });
+    }
+
     return <div className={"py-6"}>
         <Errors errors={errors}/>
         <div
@@ -72,6 +88,12 @@ export default function File({file}: { file: any }) {
                 <p>{file.name}</p>
             </div>
             <div className={"flex-1 flex justify-end"}>
+                {fileRenderer.determineType() === "text" ?
+                    <Button className={"h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2"} onClick={handleCopyToClipboard} disabled={isCopied}>
+                        {isCopied ? <Check size={"lg"}/> : <Copy size={"lg"}/>}
+                    </Button>
+                    : null
+                }
                 <Button className={"h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2"}
                         onPress={() => handleDownload(file)}><Download size={"lg"}/></Button>
                 {fileRenderer.determineType() === "text" ? (readOnly ?
@@ -91,7 +113,7 @@ export default function File({file}: { file: any }) {
         </div>
         {fileRenderer.determineType() !== "text" ?
             fileRenderer.render()
-            : <Editor value={file.content} className={"rounded-b-lg"} onChange={onChange} readOnly={readOnly}/>
+            : <Editor value={file.content} className={"rounded-b-lg"} onChange={onChange} readOnly={readOnly} language={fileRenderer.determineLanguage()}/>
         }
     </div>
 }
