@@ -5,6 +5,7 @@ import {options} from "@/app/api/auth/[...nextauth]/options";
 import {NextResponse} from "next/server";
 import {prisma} from "@/lib/prisma";
 import disk from "@/lib/disk";
+import {Session} from "next-auth";
 
 async function fetchFile(session: any, fileId: any) {
     if (!fileId) {
@@ -33,6 +34,14 @@ async function fetchFile(session: any, fileId: any) {
     }
 }
 
+async function fetchSettings(session: Session) {
+    return await prisma.setting.findMany({
+        where: {
+            userId: session?.user?.id,
+        },
+    })
+}
+
 export default async function Page({ params }: { params: { id: string[] } }) {
     const fileId = params.id ? params.id[0] : null
     const session = await getServerSession(options)
@@ -45,9 +54,11 @@ export default async function Page({ params }: { params: { id: string[] } }) {
         return NextResponse.json({ message: "Not found!" }, { status: 404 });
     }
 
+    const settings = await fetchSettings(session)
+
     return (
         <div className="flex flex-col gap-3 w-10/12 mx-auto my-4">
-            <File file={file}/>
+            <File file={file} settings={settings[0]}/>
         </div>
     );
 }
