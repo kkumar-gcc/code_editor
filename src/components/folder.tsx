@@ -24,6 +24,7 @@ import EditFolder from "@/components/folders/edit";
 import EditFile from "@/components/files/edit";
 import DeleteFolder from "@/components/folders/delete";
 import DeleteFile from "@/components/files/delete";
+import EmptyFile from "@/components/files/empty_file";
 
 export default function Folder({folders, files, parentId}:{folders: any, files: any, parentId: string | null}) {
     const newFolder = useDisclosure();
@@ -34,6 +35,7 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
     const deleteFolder = useDisclosure();
     const [file, setFile] = React.useState(null);
     const [folder, setFolder] = React.useState(null);
+    const emptyFile = useDisclosure();
 
     async function handleEditFolder (folder: any){
         setFolder(folder)
@@ -77,7 +79,8 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
                         <DropdownItem key="new_folder" startContent={<FolderIcon size={18}/> } onPress={newFolder.onOpen} >
                             New Folder
                         </DropdownItem>
-                        <DropdownItem key="new_file" startContent={<FileIcon size={18}/>} onPress={newFile.onOpen}>New file</DropdownItem>
+                        <DropdownItem key="empty_file" startContent={<FileIcon size={18}/>} onPress={emptyFile.onOpen}>New File</DropdownItem>
+                        <DropdownItem key="new_file" startContent={<FileIcon size={18}/>} onPress={newFile.onOpen}>Upload file</DropdownItem>
                     </DropdownMenu>
                 </Dropdown>
             </div>
@@ -149,5 +152,6 @@ export default function Folder({folders, files, parentId}:{folders: any, files: 
         <EditFolder isOpen={editFolder.isOpen} onClose={editFolder.onClose} onOpen={editFolder.onOpen} folder={folder} />
         <DeleteFile isOpen={deleteFile.isOpen} onClose={deleteFile.onClose} onOpen={deleteFile.onOpen} file={file} />
         <DeleteFolder isOpen={deleteFolder.isOpen} onClose={deleteFolder.onClose} onOpen={deleteFolder.onOpen} folder={folder} />
+        <EmptyFile parentId={parentId} isOpen={emptyFile.isOpen} onClose={emptyFile.onClose} onOpen={emptyFile.onOpen} />
     </div>
 }
