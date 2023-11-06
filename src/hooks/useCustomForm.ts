@@ -10,7 +10,7 @@ export function useCustomForm<TFormData>(
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [isDisabled, setIsDisabled] = React.useState(true);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
         if (e.target.value.length > 0) {
             setIsDisabled(false);
         } else {

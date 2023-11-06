@@ -17,6 +17,9 @@ export default function Editor({
                                    value,
                                    language,
                                    theme,
+                                   fontSize = "14",
+                                   fontFamily = 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
+                                   fontWeight = "600",
                                    loading = "Loading...",
                                    width,
                                    height,
@@ -91,12 +94,10 @@ export default function Editor({
                     );
                 }
             } else {
-                console.log("insde not no magtch", findValue, findNewValue)
                 resetHighlight();
                 setFoundCount(0);
             }
         } else {
-            console.log("insde not findValue", findValue, findNewValue)
             resetHighlight();
             setFoundCount(0);
         }
@@ -251,7 +252,7 @@ export default function Editor({
         <>
             {showFind ? (
                 <div
-                    className={'sticky top-0 left-0 w-full border z-10 border-gray-400 shadow-sm bg-white flex flex-row'}>
+                    className={'sticky top-0 left-0 w-full border z-10 border-gray-400 shadow-sm bg-white flex flex-row overflow-x-scroll'}>
                     <div className={'p-4 flex items-center justify-center'}>
                         <Button className={'h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
                                 onClick={toggleFindReplace}>
@@ -264,6 +265,7 @@ export default function Editor({
                             placeholder="Search"
                             variant="bordered"
                             name="find"
+                            className={"min-w-max"}
                             value={findValue}
                             onChange={(e) => {
                                 setFindValue(e.target.value);
@@ -272,22 +274,22 @@ export default function Editor({
                         {!readOnly && showReplace ? (
                             <div>
                                 <Input
-                                    className={'mt-2'}
+                                    className={'mt-2 min-w-xs'}
                                     placeholder="Replace"
                                     variant="bordered"
                                     name="replace"
                                     value={replaceValue}
                                     onChange={(e) => setReplaceValue(e.target.value)}
                                 />
-                                <div className={'mt-2'}>
+                                <div>
                                     <Button
-                                        className={'h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
+                                        className={'mt-2 h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
                                         onClick={() => handleFindReplace(true, false)}
                                     >
                                         Replace
                                     </Button>
                                     <Button
-                                        className={'h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
+                                        className={'mt-2 h-8 bg-white border min-w-unit-12 shadow rounded-lg mr-2'}
                                         onClick={() => handleFindReplace(true)}
                                     >
                                         Replace All
@@ -327,12 +329,12 @@ export default function Editor({
                     <div
                         ref={gutterRef}
                         className={"gutter"}
-                        style={{...(!isEditorReady && styles.hide)}}
+                        style={{...(!isEditorReady && styles.hide), fontFamily:fontFamily, fontSize: fontSize+"px", fontWeight:fontWeight}}
                     />
                     <div
                         ref={containerRef}
                         className={className}
-                    style={{...styles.container, ...styles.fullWidth, ...(!isEditorReady && styles.hide)}}
+                        style={{...styles.container, ...styles.fullWidth, ...(!isEditorReady && styles.hide), fontFamily:fontFamily, fontSize: fontSize+"px", fontWeight:fontWeight}}
                 />
             </div>
         </section>

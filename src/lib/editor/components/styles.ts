@@ -15,8 +15,6 @@ const styles: Record<string, CSSProperties>={
         display: 'none',
     },
     container:{
-        fontSize: '12px',
-        lineHeight: '20px',
         whiteSpace: 'pre',
         display: 'inline-block',
         background: 'white',
