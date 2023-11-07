@@ -17,29 +17,31 @@ export async function POST(req: NextRequest, { params }: { params: { id: string[
     const data = await req.formData()
     const file: File | null = data.get('file') as unknown as File
     const name: string | null = data.get('name') as unknown as string
+    const isEmpty: boolean = (data.get('isEmpty') as unknown as boolean) || false;
 
-    if (!file) {
+    if (!file && !isEmpty) {
         return NextResponse.json({ success: false })
     }
 
     try {
-        const bytes = await file.arrayBuffer()
+        const bytes = isEmpty? new TextEncoder().encode("\n"): await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
         // Generate a unique file name based on current time, user ID, and original name
         const currentTime = DateTime.now().toMillis();
         const userId = token?.sub || "unknown_user"; // Use "unknown_user" as a default if user ID is not available
         const generatedName = `${currentTime}_${userId}_${name}`;
+        const mimeType  = isEmpty?"text/plain":file.type
 
         // Upload the file to disk storage
-        const diskFile = await disk.put(generatedName, buffer, file.type);
+        const diskFile = await disk.put(generatedName, buffer, mimeType);
 
         const newFile = await prisma.file.create({
             data: {
                 name: name,
                 path: generatedName,
-                size: file.size,
-                mimeType: file.type,
+                size: !isEmpty?file.size:0,
+                mimeType: mimeType,
                 etag: diskFile.etag,
                 versionId: diskFile.versionId,
                 userId: token?.sub,
@@ -124,10 +126,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
         await disk.put(file.path, Buffer.from(content), file.mimeType);
 
+        // Update the file record in your database
+        const updatedFile = await prisma.file.update({
+            where: {
+                id: params.id[0],
+            },
+            data: {
+                size: content.length,
+            },
+        });
+
         return NextResponse.json(
             {
                 message: "file updated!",
-                file: file,
+                file: updatedFile,
             },
             { status: 200 },
         );

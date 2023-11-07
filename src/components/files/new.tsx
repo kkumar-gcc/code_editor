@@ -108,7 +108,7 @@ export default function NewFile(props: UseDisclosureProps & { parentId: string |
                             </ModalBody>
                             <ModalFooter>
                                 <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={isDisabled} isLoading={isSubmitting}>
-                                    Create
+                                    Upload
                                 </Button>
                                 <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
                                     Cancel
