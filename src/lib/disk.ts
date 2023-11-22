@@ -1,4 +1,5 @@
 import {Client} from "minio";
+import {config} from "@/config/config";
 
 // We are using Minio for disk
 // Contributed by: https://github.com/saha-alpha9
@@ -10,15 +11,15 @@ class DiskManager {
 
     constructor() {
         this.client = new Client({
-            endPoint: process.env.MINIO_ENDPOINT as string,
-            port: parseInt(process.env.MINIO_PORT as string),
+            endPoint: config.disks.minio.endpoint,
+            port: config.disks.minio.port,
             useSSL: false,
-            accessKey: process.env.MINIO_ACCESS_KEY as string,
-            secretKey: process.env.MINIO_SECRET_KEY as string,
+            accessKey: config.disks.minio.accessKey,
+            secretKey: config.disks.minio.secretKey,
         });
-        this.bucket = process.env.MINIO_BUCKET as string;
-        this.region = process.env.MINIO_REGION as string;
-        this.baseUrl = process.env.MINIO_URL as string;
+        this.bucket = config.disks.minio.bucket;
+        this.region = config.disks.minio.region;
+        this.baseUrl = config.disks.minio.url;
     }
 
     public getBucket(){
@@ -119,7 +120,7 @@ class DiskManager {
     }
 
     public exists(file: string) {
-
+        return this.client.statObject(this.bucket, file).then(() => true).catch(() => false);
     }
 
     public temporaryUrl(file: string, expiry: number){
