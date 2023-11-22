@@ -27,15 +27,15 @@ export default async function HomeLayout({children}: {
 }) {
     const session = await getServerSession(options)
     if (!session) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
+        return NextResponse.json({message: "Not authorized!"}, {status: 401});
     }
     const settings = await fetchSettings(session)
 
     return (
         <html lang="en">
         <body className={`flex items-center justify-center flex-col`}
-              // uncomment below line to use custom font for the whole app
-              // style={{fontFamily:settings[0]?.fontFamily||"", fontSize: settings[0]?.fontSize||14+"px", fontWeight:settings[0]?.fontWeight||"600"}}
+            // uncomment below line to use custom font for the whole app
+            // style={{fontFamily:settings[0]?.fontFamily||"", fontSize: settings[0]?.fontSize||14+"px", fontWeight:settings[0]?.fontWeight||"600"}}
         >
         <Providers>
             <Navbar settings={settings[0]}/>

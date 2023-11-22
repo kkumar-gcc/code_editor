@@ -84,50 +84,54 @@ export default function NewFile(props: UseDisclosureProps & { parentId: string |
                     {(onClose) => (
                         <>
                             <form onSubmit={onSubmit}>
-                            <ModalHeader className="flex flex-col gap-1">Upload a file</ModalHeader>
-                            <ModalBody>
-                                {errors.root?.random && <p className={"text-rose-600"}>{errors.root?.random.message}</p>}
-                                <Input
-                                    type={"file"}
-                                    label="File"
-                                    placeholder="Select a file"
-                                    variant="bordered"
-                                    id={"file_upload"}
-                                    className={"sr-only"}
-                                    {...rest}
-                                    onChange={async (e)=>{
-                                        await onChange(e);
-                                        await setValue("name", e.target?.files![0]?.name)
-                                    }}
-                                />
-                                <label
-                                    className="z-0 group relative inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 px-unit-4 min-w-unit-20 h-unit-10 text-small gap-unit-2 [&>svg]:max-w-[theme(spacing.unit-8)] data-[pressed=true]:scale-[0.97] transition-transform-colors motion-reduce:transition-none text-default-foreground bg-white border shadow rounded-lg hover:cursor-pointer"
-                                    htmlFor={"file_upload"}>
-                                    {isFileSelected ? name : "Select a file"}
-                                </label>
-                                {errors.file && <p role="alert">{errors.file.message}</p>}
-                                {isFileSelected && (
+                                <ModalHeader className="flex flex-col gap-1">Upload a file</ModalHeader>
+                                <ModalBody>
+                                    {errors.root?.random &&
+                                        <p className={"text-rose-600"}>{errors.root?.random.message}</p>}
                                     <Input
-                                        autoFocus
-                                        endContent={
-                                            <FileIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
-                                        }
-                                        label="Name"
-                                        placeholder="Enter your file name"
+                                        type={"file"}
+                                        label="File"
+                                        placeholder="Select a file"
                                         variant="bordered"
-                                        {...register("name")}
+                                        id={"file_upload"}
+                                        className={"sr-only"}
+                                        {...rest}
+                                        onChange={async (e) => {
+                                            await onChange(e);
+                                            await setValue("name", e.target?.files![0]?.name)
+                                        }}
                                     />
-                                )}
-                                {errors.name && <p className={"text-rose-600"}>{errors.name.message}</p>}
-                            </ModalBody>
-                            <ModalFooter>
-                                <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={!isDirty || !isValid}  isLoading={isSubmitting}>
-                                    Upload
-                                </Button>
-                                <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
-                                    Cancel
-                                </Button>
-                            </ModalFooter>
+                                    <label
+                                        className="z-0 group relative inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 px-unit-4 min-w-unit-20 h-unit-10 text-small gap-unit-2 [&>svg]:max-w-[theme(spacing.unit-8)] data-[pressed=true]:scale-[0.97] transition-transform-colors motion-reduce:transition-none text-default-foreground bg-white border shadow rounded-lg hover:cursor-pointer"
+                                        htmlFor={"file_upload"}>
+                                        {isFileSelected ? name : "Select a file"}
+                                    </label>
+                                    {errors.file && <p role="alert">{errors.file.message}</p>}
+                                    {isFileSelected && (
+                                        <Input
+                                            autoFocus
+                                            endContent={
+                                                <FileIcon size={24}
+                                                          className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
+                                            }
+                                            label="Name"
+                                            placeholder="Enter your file name"
+                                            variant="bordered"
+                                            {...register("name")}
+                                        />
+                                    )}
+                                    {errors.name && <p className={"text-rose-600"}>{errors.name.message}</p>}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button type={"submit"}
+                                            className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"}
+                                            disabled={!isDirty || !isValid} isLoading={isSubmitting}>
+                                        Upload
+                                    </Button>
+                                    <Button className={"bg-white border shadow rounded-lg"} onPress={onClose}>
+                                        Cancel
+                                    </Button>
+                                </ModalFooter>
                             </form>
                         </>
                     )}

@@ -2,7 +2,7 @@
 import React from "react";
 import {Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
-import {Folder as FolderIcon} from "@/components/geist-ui/icons";
+import {Folder as FolderIcon} from "@geist-ui/icons";
 import {useRouter} from "next/navigation";
 import {useForm} from "react-hook-form";
 import * as yup from "yup";

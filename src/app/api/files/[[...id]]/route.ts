@@ -14,6 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string[
     if (params.id) {
         parentId = params.id[0];
     }
+
     const data = await req.formData()
     const file: File | null = data.get('file') as unknown as File
     const name: string | null = data.get('name') as unknown as string

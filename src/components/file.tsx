@@ -3,7 +3,7 @@ import {Editor} from "@/lib/editor";
 import React from "react";
 import {Button} from "@nextui-org/react";
 import {useRouter} from "next/navigation";
-import {Download, Copy, Check} from "@/components/geist-ui/icons";
+import {Check, Copy, Download} from "@geist-ui/icons";
 import Renderer from "@/lib/file/renderer";
 import * as yup from "yup";
 import {useForm} from "react-hook-form";

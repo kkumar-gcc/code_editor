@@ -1,7 +1,7 @@
 "use client";
-import { signIn } from "next-auth/react";
+import {signIn} from "next-auth/react";
 import {Button} from "@nextui-org/react";
-import {Github} from "@/components/geist-ui/icons";
+import {Github} from "@geist-ui/icons";
 import React from "react";
 
 export default function LoginPage() {

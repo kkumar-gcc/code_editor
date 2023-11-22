@@ -17,7 +17,7 @@ import {
 import React from "react";
 import {DateTime} from "luxon";
 import Link from "next/link";
-import {Edit, File as FileIcon, Folder as FolderIcon, MoreHorizontal, Plus, Trash2} from '@/components/geist-ui/icons';
+import {Edit, File as FileIcon, Folder as FolderIcon, MoreHorizontal, Plus, Trash2} from '@geist-ui/icons';
 import NewFolder from "@/components/folders/new";
 import NewFile from "@/components/files/new";
 import EditFolder from "@/components/folders/edit";

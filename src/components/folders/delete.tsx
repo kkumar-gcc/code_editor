@@ -1,13 +1,6 @@
 "use client"
 import React from "react";
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-} from "@nextui-org/react";
+import {Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader,} from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
 import * as yup from "yup";
@@ -73,14 +66,17 @@ export default function DeleteFolder(props: UseDisclosureProps & { folder: any |
                             <form onSubmit={onSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
                                 <ModalBody>
-                                    {errors.root?.random && <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}
+                                    {errors.root?.random &&
+                                        <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}
                                     <p>Do you really want to delete this folder?</p>
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} isLoading={isSubmitting}>
+                                    <Button type={"submit"}
+                                            className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"}
+                                            isLoading={isSubmitting}>
                                         Delete folder
                                     </Button>
-                                    <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
+                                    <Button className={"bg-white border shadow rounded-lg"} onPress={onClose}>
                                         Cancel
                                     </Button>
                                 </ModalFooter>

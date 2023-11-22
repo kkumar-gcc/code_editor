@@ -1,14 +1,6 @@
 "use client"
 import React from "react";
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    Input
-} from "@nextui-org/react";
+import {Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {File as FileIcon} from "@geist-ui/icons";
 import {useRouter} from "next/navigation";
@@ -79,24 +71,29 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                             <form onSubmit={onSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Edit file</ModalHeader>
                                 <ModalBody>
-                                    {errors.root?.random && <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}
+                                    {errors.root?.random &&
+                                        <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}
                                     <Input
                                         autoFocus
                                         endContent={
-                                            <FileIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
+                                            <FileIcon size={24}
+                                                      className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
                                         }
                                         label="Name"
                                         placeholder="Enter your file name"
                                         variant="bordered"
                                         {...register("name")}
                                     />
-                                    {errors.name && <p role="alert" className={"text-rose-600"}>{errors.name.message}</p>}
+                                    {errors.name &&
+                                        <p role="alert" className={"text-rose-600"}>{errors.name.message}</p>}
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={!isDirty || !isValid} isLoading={isSubmitting}>
+                                    <Button type={"submit"}
+                                            className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"}
+                                            disabled={!isDirty || !isValid} isLoading={isSubmitting}>
                                         Edit file
                                     </Button>
-                                    <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
+                                    <Button className={"bg-white border shadow rounded-lg"} onPress={onClose}>
                                         Cancel
                                     </Button>
                                 </ModalFooter>
