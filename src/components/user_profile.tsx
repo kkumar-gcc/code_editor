@@ -10,10 +10,10 @@ import {Loading} from "@geist-ui/core";
 export default function UserProfile() {
     const {data: session, status} = useSession();
 
-    const handleSignOutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleSignOutClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
 
-        signOut();
+        await signOut();
     };
 
     if (status === "loading") return <Loading />;

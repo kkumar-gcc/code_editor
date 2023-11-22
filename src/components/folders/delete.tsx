@@ -10,38 +10,59 @@ import {
 } from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {useRouter} from "next/navigation";
-import {useCustomForm} from "@/hooks/useCustomForm";
-import {CustomError} from "@/types/customError";
-import Errors from "@/components/errors";
+import * as yup from "yup";
+import {useForm} from "react-hook-form";
+import {yupResolver} from "@hookform/resolvers/yup";
+
+const schema = yup
+    .object({
+        folderId: yup.string().required(),
+    })
+    .required();
 
 export default function DeleteFolder(props: UseDisclosureProps & { folder: any | null }) {
     const router = useRouter();
 
-    const {errors, isSubmitting, isDisabled, handleSubmit, resetForm, setIsDisabled } = useCustomForm(
-        {
-            folderId: props.folder?.id,
-        },
-        async (formData, setError) => {
-            const formURL = `/api/folders/${props.folder.id}`;
+    const {
+        setError,
+        handleSubmit,
+        reset,
+        clearErrors,
+        formState: {errors, isSubmitting}
+    } = useForm({
+        resolver: yupResolver(schema),
+        defaultValues: {
+            folderId: props.folder?.id as string
+        }
+    });
 
-            const res = await fetch(formURL, {
-                method: "DELETE",
-            });
+    const onSubmit = handleSubmit((data) => {
+        const formURL = `/api/folders/${props.folder.id}`;
 
+        fetch(formURL, {
+            method: "DELETE"
+        }).then((res) => {
             if (res.status === 200) {
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
             } else {
-                setError(new CustomError("An error occurred while deleting the folder."));
+                setError("root.random", {
+                    message: "an error occurred while deleting the folder",
+                    type: "random",
+                })
             }
-        }
-    );
+        }).catch((err) => {
+            console.error(err);
+        })
+    })
 
     React.useEffect(() => {
-        resetForm();
-        setIsDisabled(false);
-    },[props.isOpen, props.folder]);
+        if (props.isOpen && props.folder) {
+            reset({folderId: props.folder?.id as string})
+            clearErrors()
+        }
+    }, [clearErrors, reset, props])
 
     return (
         <>
@@ -49,15 +70,15 @@ export default function DeleteFolder(props: UseDisclosureProps & { folder: any |
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <form onSubmit={handleSubmit}>
+                            <form onSubmit={onSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
                                 <ModalBody>
-                                    <Errors errors={errors} />
+                                    {errors.root?.random && <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}
                                     <p>Do you really want to delete this folder?</p>
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={isDisabled} isLoading={isSubmitting}>
-                                        Delete
+                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} isLoading={isSubmitting}>
+                                        Delete folder
                                     </Button>
                                     <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
                                         Cancel
