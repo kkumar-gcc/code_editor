@@ -1,22 +1,21 @@
 import {NextRequest, NextResponse} from "next/server";
-import {getToken} from "next-auth/jwt";
 import {prisma} from "@/lib/prisma";
+import {getUserToken} from "@/app/api/utils/auth";
+import {handleErrors} from "@/app/api/utils/middleware";
+import {HttpStatus} from "@/app/api/utils/http_status";
 
 export async function POST(req: NextRequest) {
-    const token = await getToken({req: req});
-    if (!token || token?.sub == null) {
-        return NextResponse.json({message: "Not authorized!"}, {status: 401});
-    }
+    return handleErrors(async () => {
+        const token = await getUserToken(req);
 
-    const {fontSize, fontFamily, fontWeight} = await req.json();
+        const {fontSize, fontFamily, fontWeight} = await req.json();
 
-    try {
         const setting = await prisma.setting.upsert({
             where: {
-                userId: token?.sub,
+                userId: token.sub,
             },
             create: {
-                userId: token?.sub,
+                userId: token.sub as string,
                 fontSize: fontSize,
                 fontFamily: fontFamily,
                 fontWeight: fontWeight,
@@ -30,38 +29,10 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(
             {
-                message: "settings updated!",
-                setting: setting,
+                message: "Settings updated!",
+                setting,
             },
-            {status: 200},
+            {status: HttpStatus.Ok},
         );
-    } catch (error) {
-        console.error("Error:", error);
-        return NextResponse.json({message: "An error occurred."}, {status: 500});
-    }
-}
-
-export async function GET(req: NextRequest) {
-    const token = await getToken({req: req});
-    if (!token || token?.sub == null) {
-        return NextResponse.json({message: "Not authorized!"}, {status: 401});
-    }
-    try {
-        const settings = await prisma.setting.findFirst({
-            where: {
-                    userId: token?.sub,
-            }
-        })
-
-        return NextResponse.json(
-            {
-                message: "settings fetched!",
-                setting: settings,
-            },
-            {status: 200},
-        );
-    } catch (error) {
-        console.error("Error:", error);
-        return NextResponse.json({message: "An error occurred."}, {status: 500});
-    }
+    });
 }
