@@ -3,20 +3,19 @@ import {signOut} from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import {useSession} from "next-auth/react";
-
+import { Spinner } from "@nextui-org/react";
 import React from "react";
-import {Loading} from "@geist-ui/core";
 
 export default function UserProfile() {
     const {data: session, status} = useSession();
 
-    const handleSignOutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleSignOutClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
 
-        signOut();
+        await signOut();
     };
 
-    if (status === "loading") return <Loading />;
+    if (status === "loading") return <Spinner color="default"/>;
 
     if (!session) {
         return (

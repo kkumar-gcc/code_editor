@@ -9,7 +9,7 @@ import 'prismjs/themes/prism.css';
 import styles from "./styles";
 import "./Editor.css";
 import {Button, Input} from "@nextui-org/react";
-import {Search as SearchIcon} from "@/components/geist-ui/icons";
+import {Search as SearchIcon} from "@geist-ui/icons";
 
 export default function Editor({
                                    defaultValue,

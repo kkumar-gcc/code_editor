@@ -27,7 +27,7 @@ async function fetchFile(session: any, fileId: any) {
         let url = disk.url(file.path)
         const content = new TextDecoder('utf-8').decode(await disk.get(file.path));
 
-        return { ...file, url, content }
+        return {...file, url, content}
     } catch (e) {
         console.log(e)
         return null
@@ -42,16 +42,16 @@ async function fetchSettings(session: Session) {
     })
 }
 
-export default async function Page({ params }: { params: { id: string[] } }) {
+export default async function Page({params}: { params: { id: string[] } }) {
     const fileId = params.id ? params.id[0] : null
     const session = await getServerSession(options)
     if (!session) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
+        return NextResponse.json({message: "Not authorized!"}, {status: 401});
     }
 
     const file = await fetchFile(session, fileId)
     if (!file) {
-        return NextResponse.json({ message: "Not found!" }, { status: 404 });
+        return NextResponse.json({message: "Not found!"}, {status: 404});
     }
 
     const settings = await fetchSettings(session)

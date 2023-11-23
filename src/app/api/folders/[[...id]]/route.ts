@@ -1,61 +1,47 @@
 import {NextRequest, NextResponse} from "next/server";
-import {getToken} from "next-auth/jwt";
 import {prisma} from "@/lib/prisma";
+import {getUserToken} from "@/app/api/utils/auth";
+import {handleErrors} from "@/app/api/utils/middleware";
+import {HttpStatus} from "@/app/api/utils/http_status";
+import {ApiError} from "@/app/api/utils/api_error";
+import {clearFolder} from "@/app/api/utils/folder";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string[] }}){
-    const token = await getToken({ req: req });
-    if (!token || token?.sub == null) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
-    }
+export async function POST(req: NextRequest, {params}: { params: { id: string[] } }) {
+    return handleErrors(async () => {
+        const token = await getUserToken(req);
+        const {name} = await req.json();
 
-    let parentId = null;
-    if (params.id) {
-        console.log(params.id);
-        parentId = params.id[0];
-    }
-
-    const { name } = await req.json();
-
-    try {
         const folder = await prisma.folder.create({
             data: {
                 name: name,
-                userId: token?.sub,
-                parentId: parentId,
+                userId: token.sub as string,
+                parentId: params.id?.[0],
             },
         });
 
         return NextResponse.json(
             {
-                message: "folder created!",
-                folder: folder,
+                message: "Folder created!",
+                folder,
             },
-            { status: 200 },
+            {status: HttpStatus.Ok},
         );
-    } catch (error) {
-        console.error("Error:", error);
-        return NextResponse.json({ message: "An error occurred." }, { status: 500 });
-    }
+    });
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string }}){
-    const token = await getToken({ req: req });
+export async function PUT(req: NextRequest, { params }: { params: { id: string }}) {
+    return handleErrors(async () => {
+        const token = await getUserToken(req);
+        if (!params.id) {
+            throw new ApiError(HttpStatus.BadRequest, "id is required!");
+        }
 
-    if (!token || token?.sub == null) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
-    }
+        const {name} = await req.json();
 
-    if (!params.id) {
-        return NextResponse.json({ message: "id is required!" }, { status: 400 });
-    }
-
-    const { name } = await req.json();
-
-    try {
         const folder = await prisma.folder.update({
             where: {
                 id: params.id[0],
-                userId: token?.sub,
+                userId: token.sub,
             },
             data: {
                 name: name,
@@ -64,45 +50,30 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
         return NextResponse.json(
             {
-                message: "folder updated!",
-                folder: folder,
+                message: "Folder updated!",
+                folder,
             },
-            { status: 200 },
+            {status: HttpStatus.Ok},
         );
-    } catch (error) {
-        console.error("Error:", error);
-        return NextResponse.json({ message: "An error occurred." }, { status: 500 });
-    }
+    });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }){
-    const token = await getToken({ req: req });
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+    return handleErrors(async () => {
+        const token = await getUserToken(req);
 
-    if (!token || token?.sub == null) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
-    }
+        if (!params.id) {
+            throw new ApiError(HttpStatus.BadRequest, "ID is required!");
+        }
 
-    if (!params.id) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
-    }
-
-    try {
-        // delete all files and sub-folders in folder
-        await prisma.folder.delete({
-            where: {
-                id: params.id[0],
-                userId: token?.sub,
-            },
-        });
+        // Delete all files and sub-folders in the folder
+        await clearFolder(params.id?.[0], token.sub as string);
 
         return NextResponse.json(
             {
-                message: "folder deleted!",
+                message: "Folder deleted!",
             },
-            { status: 200 },
+            {status: HttpStatus.Ok},
         );
-    } catch (error) {
-        console.error("Error:", error);
-        return NextResponse.json({ message: "An error occurred." }, { status: 500 });
-    }
+    });
 }

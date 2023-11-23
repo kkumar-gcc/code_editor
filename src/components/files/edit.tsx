@@ -1,64 +1,66 @@
 "use client"
 import React from "react";
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    Input
-} from "@nextui-org/react";
+import {Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/react";
 import {UseDisclosureProps} from "@nextui-org/use-disclosure";
 import {File as FileIcon} from "@geist-ui/icons";
 import {useRouter} from "next/navigation";
-import {useCustomForm} from "@/hooks/useCustomForm";
-import {CustomError} from "@/types/customError";
-import Errors from "@/components/errors";
+import * as yup from "yup";
+import {useForm} from "react-hook-form";
+import {yupResolver} from "@hookform/resolvers/yup";
+
+const schema = yup
+    .object({
+        name: yup.string().required(),
+    })
+    .required();
 
 export default function EditFile(props: UseDisclosureProps & { file: any | null }) {
     const router = useRouter();
-    const { state, setState, errors, isSubmitting, isDisabled, setIsDisabled, handleSubmit, resetForm } = useCustomForm(
-        {
-            name: props.file?.name,
-        },
-        async (formData, setError) => {
-            const formURL = `/api/files/${props.file.id}`;
+    const {
+        register,
+        setError,
+        handleSubmit,
+        reset,
+        clearErrors,
+        formState: {errors, isSubmitting, isDirty, isValid}
+    } = useForm({
+        resolver: yupResolver(schema),
+        defaultValues: {
+            name: props.file?.name as string
+        }
+    });
 
-            const res = await fetch(formURL, {
-                method: "PUT",
-                body: JSON.stringify(formData),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+    const onSubmit = handleSubmit((data) => {
+        const formURL = `/api/files/${props.file.id}`;
 
+        fetch(formURL, {
+            method: "PUT",
+            body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json",
+            }
+        }).then((res) => {
             if (res.status === 200) {
                 // @ts-ignore
                 props.onClose();
                 router.refresh();
             } else {
-                setError(new CustomError("An error occurred while editing the file."));
+                setError("root.random", {
+                    message: "an error occurred while editing the file",
+                    type: "random",
+                })
             }
-        }
-    );
-
-    // custom handle change
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 0 && e.target.value !== props.file.name) {
-            setIsDisabled(false);
-        } else {
-            setIsDisabled(true);
-        }
-        setState({
-            ...state,
-            [e.target.name]: e.target.value,
-        });
-    }
+        }).catch((err) => {
+            console.error(err);
+        })
+    })
 
     React.useEffect(() => {
-        resetForm();
-    },[props.isOpen, props.file]);
+        if (props.isOpen && props.file) {
+            reset({name: props.file?.name as string})
+            clearErrors()
+        }
+    }, [clearErrors, reset, props])
 
     return (
         <>
@@ -66,28 +68,32 @@ export default function EditFile(props: UseDisclosureProps & { file: any | null 
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <form onSubmit={handleSubmit}>
+                            <form onSubmit={onSubmit}>
                                 <ModalHeader className="flex flex-col gap-1">Edit file</ModalHeader>
                                 <ModalBody>
-                                    <Errors errors={errors} />
+                                    {errors.root?.random &&
+                                        <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}
                                     <Input
                                         autoFocus
                                         endContent={
-                                            <FileIcon size={24} className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
+                                            <FileIcon size={24}
+                                                      className="text-2xl text-default-400 pointer-events-none flex-shrink-0"/>
                                         }
                                         label="Name"
                                         placeholder="Enter your file name"
                                         variant="bordered"
-                                        name="name"
-                                        value={state.name}
-                                        onChange={handleChange}
+                                        {...register("name")}
                                     />
+                                    {errors.name &&
+                                        <p role="alert" className={"text-rose-600"}>{errors.name.message}</p>}
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button type={"submit"} className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"} disabled={isDisabled} isLoading={isSubmitting}>
-                                        Edit
+                                    <Button type={"submit"}
+                                            className={"bg-rose-600 border shadow rounded-lg border-rose-800 text-white disabled:bg-rose-300 disabled:border-rose-400"}
+                                            disabled={!isDirty || !isValid} isLoading={isSubmitting}>
+                                        Edit file
                                     </Button>
-                                    <Button className={"bg-white border shadow rounded-lg"}  onPress={onClose}>
+                                    <Button className={"bg-white border shadow rounded-lg"} onPress={onClose}>
                                         Cancel
                                     </Button>
                                 </ModalFooter>

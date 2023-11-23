@@ -24,11 +24,11 @@ async function fetchFiles(session: Session, parentId: any) {
     })
 }
 
-export default async function Page({ params }: { params: { id: string[] } }) {
+export default async function Page({params}: { params: { id: string[] } }) {
     const parentId = params.id ? params.id[0] : null
     const session = await getServerSession(options)
     if (!session) {
-        return NextResponse.json({ message: "Not authorized!" }, { status: 401 });
+        return NextResponse.json({message: "Not authorized!"}, {status: 401});
     }
     const foldersData = fetchFolders(session, parentId)
     const filesData = fetchFiles(session, parentId)
