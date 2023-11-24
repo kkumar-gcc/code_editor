@@ -64,7 +64,7 @@ export default function DeleteFolder(props: UseDisclosureProps & { folder: any |
                     {(onClose) => (
                         <>
                             <form onSubmit={onSubmit}>
-                                <ModalHeader className="flex flex-col gap-1">Delete folder</ModalHeader>
+                                <ModalHeader className="flex flex-col gap-1">Delete the folder</ModalHeader>
                                 <ModalBody>
                                     {errors.root?.random &&
                                         <p role="alert" className={"text-rose-600"}>{errors.root?.random.message}</p>}

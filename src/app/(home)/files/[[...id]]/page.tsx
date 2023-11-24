@@ -3,7 +3,7 @@ import File from "@/components/file";
 import {getServerSession} from "next-auth/next";
 import {options} from "@/app/api/auth/[...nextauth]/options";
 import {NextResponse} from "next/server";
-import {prisma} from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import disk from "@/lib/disk";
 import {Session} from "next-auth";
 

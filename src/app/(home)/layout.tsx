@@ -4,7 +4,7 @@ import {Providers} from "@/app/providers";
 import React from "react";
 import Navbar from "@/components/navbar"
 import {Session} from "next-auth";
-import {prisma} from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import {getServerSession} from "next-auth/next";
 import {options} from "@/app/api/auth/[...nextauth]/options";
 import {NextResponse} from "next/server";

@@ -39,7 +39,7 @@ describe('EditFolder component', () => {
     const nameInput = getByLabelText('Name')
     fireEvent.change(nameInput, {target: {value: 'New Folder Name'}})
 
-    const submitButton = getByText('Create')
+    const submitButton = getByText('Edit folder')
     fireEvent.click(submitButton)
 
     const folder = {
