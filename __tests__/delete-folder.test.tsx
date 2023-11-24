@@ -33,12 +33,12 @@ describe('Delete component', () => {
 
     const {getByText} = render(<DeleteFolder {...props} />)
 
-    expect(getByText('Delete folder')).toBeInTheDocument()
+    expect(getByText('Delete the folder')).toBeInTheDocument()
     expect(
       getByText('Do you really want to delete this folder?'),
     ).toBeInTheDocument()
 
-    const deleteButton = getByText('Delete')
+    const deleteButton = getByText('Delete folder')
     fireEvent.click(deleteButton)
 
     fetchMock.mockResponseOnce(
