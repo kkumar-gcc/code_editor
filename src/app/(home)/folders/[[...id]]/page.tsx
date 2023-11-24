@@ -3,7 +3,7 @@ import Folder from "@/components/folder";
 import {getServerSession} from "next-auth/next";
 import {options} from "@/app/api/auth/[...nextauth]/options";
 import {NextResponse} from "next/server";
-import {prisma} from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import {Session} from "next-auth";
 
 async function fetchFolders(session: Session, parentId: any) {

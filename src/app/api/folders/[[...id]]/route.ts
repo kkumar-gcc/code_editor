@@ -1,15 +1,19 @@
 import {NextRequest, NextResponse} from "next/server";
-import {prisma} from "@/lib/prisma";
 import {getUserToken} from "@/app/api/utils/auth";
 import {handleErrors} from "@/app/api/utils/middleware";
 import {HttpStatus} from "@/app/api/utils/http_status";
 import {ApiError} from "@/app/api/utils/api_error";
 import {clearFolder} from "@/app/api/utils/folder";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest, {params}: { params: { id: string[] } }) {
     return handleErrors(async () => {
         const token = await getUserToken(req);
         const {name} = await req.json();
+
+        if (!name) {
+            throw new ApiError(HttpStatus.BadRequest, "name is required!");
+        }
 
         const folder = await prisma.folder.create({
             data: {
@@ -37,6 +41,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         }
 
         const {name} = await req.json();
+        if (!name) {
+            throw new ApiError(HttpStatus.BadRequest, "name is required!");
+        }
 
         const folder = await prisma.folder.update({
             where: {
